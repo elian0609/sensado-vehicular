@@ -1,0 +1,81 @@
+@prefix proy: <https://github.com/elian0609/sensado-vehicular.gitvocab#> .
+@prefix sosa: <http://www.w3.org/ns/sosa/> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+@prefix dct:  <http://purl.org/dc/terms/> .
+
+<https://github.com/elian0609/sensado-vehicular.gitvocab> a owl:Ontology ;
+    dct:title "Vocabulario de extensión para sensado vehicular oportunista"@es ;
+    owl:imports <http://www.w3.org/ns/sosa/> .
+
+proy:unit a owl:DatatypeProperty ;
+    rdfs:label "unidad"@es ;
+    rdfs:comment "Unidad de medida asociada al valor de una observación."@es ;
+    rdfs:domain sosa:Observation ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <https://github.com/elian0609/sensado-vehicular.gitvocab> .
+
+proy:defaultUnit a owl:DatatypeProperty ;
+    rdfs:label "unidad por defecto"@es ;
+    rdfs:comment "Unidad de medida por defecto de una propiedad observada."@es ;
+    rdfs:domain sosa:ObservableProperty ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <https://github.com/elian0609/sensado-vehicular.gitvocab> .
+
+proy:sensorModel a owl:DatatypeProperty ;
+    rdfs:label "modelo del sensor"@es ;
+    rdfs:comment "Modelo físico del dispositivo sensor (p. ej. PPD42NS)."@es ;
+    rdfs:domain sosa:Sensor ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <https://github.com/elian0609/sensado-vehicular.gitvocab> .
+
+proy:sensorType a owl:DatatypeProperty ;
+    rdfs:label "tipo de sensor"@es ;
+    rdfs:comment "Categoría de magnitud que mide el dispositivo (catálogo abierto)."@es ;
+    rdfs:domain sosa:Sensor ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <https://github.com/elian0609/sensado-vehicular.gitvocab> .
+
+proy:calibrationParams a owl:DatatypeProperty ;
+    rdfs:label "parámetros de calibración"@es ;
+    rdfs:comment "Parámetros de calibración propios del sensor, como objeto JSON."@es ;
+    rdfs:domain sosa:Sensor ;
+    rdfs:range rdf:JSON ;
+    rdfs:isDefinedBy <https://github.com/elian0609/sensado-vehicular.gitvocab> .
+
+proy:installDate a owl:DatatypeProperty ;
+    rdfs:label "fecha de instalación"@es ;
+    rdfs:comment "Fecha de instalación física del sensor sobre la plataforma vehicular."@es ;
+    rdfs:domain sosa:Sensor ;
+    rdfs:range xsd:date ;
+    rdfs:isDefinedBy <https://github.com/elian0609/sensado-vehicular.gitvocab> .
+
+proy:status a owl:DatatypeProperty ;
+    rdfs:label "estado"@es ;
+    rdfs:comment "Estado operativo del dispositivo (activo / inactivo)."@es ;
+    rdfs:domain sosa:Sensor ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <https://github.com/elian0609/sensado-vehicular.gitvocab> .
+
+proy:vehicleType a owl:DatatypeProperty ;
+    rdfs:label "tipo de vehículo"@es ;
+    rdfs:comment "Tipo de vehículo sobre el que opera la plataforma."@es ;
+    rdfs:domain sosa:Platform ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <https://github.com/elian0609/sensado-vehicular.gitvocab> .
+
+proy:routeLabel a owl:DatatypeProperty ;
+    rdfs:label "etiqueta de ruta"@es ;
+    rdfs:comment "Identificador de la ruta urbana recorrida por la plataforma."@es ;
+    rdfs:domain sosa:Platform ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <https://github.com/elian0609/sensado-vehicular.gitvocab> .
+
+proy:registrationDate a owl:DatatypeProperty ;
+    rdfs:label "fecha de registro"@es ;
+    rdfs:comment "Fecha de alta de la plataforma dentro del sistema."@es ;
+    rdfs:domain sosa:Platform ;
+    rdfs:range xsd:date ;
+    rdfs:isDefinedBy <https://github.com/elian0609/sensado-vehicular.gitvocab> .

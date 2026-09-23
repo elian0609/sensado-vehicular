@@ -1,0 +1,26 @@
+{
+  "@context": {
+    "@base": "https://github.com/elian0609/sensado-vehicular.gitid/",
+    "sosa": "http://www.w3.org/ns/sosa/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "proy": "https://github.com/elian0609/sensado-vehicular.gitvocab#",
+    "sensor_id": {
+      "@id": "sosa:madeBySensor",
+      "@type": "@id"
+    },
+    "observed_property": {
+      "@id": "sosa:observedProperty",
+      "@type": "@id"
+    },
+    "value": {
+      "@id": "sosa:hasSimpleResult",
+      "@type": "xsd:double"
+    },
+    "result_time": {
+      "@id": "sosa:resultTime",
+      "@type": "xsd:dateTimeStamp"
+    },
+    "feature_of_interest": "sosa:hasFeatureOfInterest",
+    "unit": "proy:unit"
+  }
+}

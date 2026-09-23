@@ -1,0 +1,23 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vocabulario proy:</title>
+<link rel="alternate" type="text/turtle" href="vocab.ttl">
+<style>body{font-family:system-ui,sans-serif;max-width:60rem;margin:2rem auto;padding:0 1rem}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:.4rem;text-align:left;vertical-align:top}
+:target{background:#fff6c7}</style></head><body>
+<h1>Vocabulario de extensión <code>proy:</code></h1>
+<p>Espacio de nombres: <code>https://github.com/elian0609/sensado-vehicular.gitvocab#</code>. Extiende SOSA/SSN
+(<code>http://www.w3.org/ns/sosa/</code>) solo con los términos que SOSA no define.
+Versión legible por máquina: <a href="vocab.ttl">vocab.ttl</a>.
+Contexto JSON-LD de KI-1: <a href="context/ki1.jsonld">context/ki1.jsonld</a>.</p>
+<table><tr><th>Término</th><th>Etiqueta</th><th>Dominio</th><th>Rango</th><th>Definición</th></tr>
+<tr id="unit"><td><code>proy:unit</code></td><td>unidad</td><td><code>sosa:Observation</code></td><td><code>xsd:string</code></td><td>Unidad de medida asociada al valor de una observación.</td></tr>
+<tr id="defaultUnit"><td><code>proy:defaultUnit</code></td><td>unidad por defecto</td><td><code>sosa:ObservableProperty</code></td><td><code>xsd:string</code></td><td>Unidad de medida por defecto de una propiedad observada.</td></tr>
+<tr id="sensorModel"><td><code>proy:sensorModel</code></td><td>modelo del sensor</td><td><code>sosa:Sensor</code></td><td><code>xsd:string</code></td><td>Modelo físico del dispositivo sensor (p. ej. PPD42NS).</td></tr>
+<tr id="sensorType"><td><code>proy:sensorType</code></td><td>tipo de sensor</td><td><code>sosa:Sensor</code></td><td><code>xsd:string</code></td><td>Categoría de magnitud que mide el dispositivo (catálogo abierto).</td></tr>
+<tr id="calibrationParams"><td><code>proy:calibrationParams</code></td><td>parámetros de calibración</td><td><code>sosa:Sensor</code></td><td><code>rdf:JSON</code></td><td>Parámetros de calibración propios del sensor, como objeto JSON.</td></tr>
+<tr id="installDate"><td><code>proy:installDate</code></td><td>fecha de instalación</td><td><code>sosa:Sensor</code></td><td><code>xsd:date</code></td><td>Fecha de instalación física del sensor sobre la plataforma vehicular.</td></tr>
+<tr id="status"><td><code>proy:status</code></td><td>estado</td><td><code>sosa:Sensor</code></td><td><code>xsd:string</code></td><td>Estado operativo del dispositivo (activo / inactivo).</td></tr>
+<tr id="vehicleType"><td><code>proy:vehicleType</code></td><td>tipo de vehículo</td><td><code>sosa:Platform</code></td><td><code>xsd:string</code></td><td>Tipo de vehículo sobre el que opera la plataforma.</td></tr>
+<tr id="routeLabel"><td><code>proy:routeLabel</code></td><td>etiqueta de ruta</td><td><code>sosa:Platform</code></td><td><code>xsd:string</code></td><td>Identificador de la ruta urbana recorrida por la plataforma.</td></tr>
+<tr id="registrationDate"><td><code>proy:registrationDate</code></td><td>fecha de registro</td><td><code>sosa:Platform</code></td><td><code>xsd:date</code></td><td>Fecha de alta de la plataforma dentro del sistema.</td></tr></table></body></html>
