@@ -31,27 +31,37 @@ REQUIRED = {
 def check(line: str):
     doc = json.loads(line)
     nquads = jsonld.to_rdf(doc, {"format": "application/n-quads"})
-    errors = [f"{pc} ausente" for pc, iri in REQUIRED.items() if f"<{iri}>" not in nquads]
-    if "pulse_count" in nquads:
-        errors.append("'raw' se filtró a la expansión semántica")
-    return len(line.encode()), nquads, errors
+    kind = doc.get("@type", "?")
+    errors = []
+    if not nquads.strip():
+        errors.append("sin triples")
+    if kind == "sosa:Observation":
+        errors += [f"{pc} ausente" for pc, iri in REQUIRED.items() if f"<{iri}>" not in nquads]
+        if "pulse_count" in nquads:
+            errors.append("'raw' se filtró a la expansión semántica")
+    elif kind == "sosa:Sensor" and f"<{SOSA}isHostedBy>" not in nquads:
+        errors.append("PC2 (plataforma) ausente: falta sosa:isHostedBy")
+    return kind, len(line.encode()), nquads, errors
 
 
 def main():
     path, show = sys.argv[1], "--show" in sys.argv
-    sizes, failed = [], 0
+    sizes, failed, shown, total = {}, 0, set(), 0
     with open(path, encoding="utf-8") as f:
         for i, line in enumerate(l for l in f if l.strip()):
-            size, nquads, errors = check(line.strip())
-            sizes.append(size)
+            kind, size, nquads, errors = check(line.strip())
+            sizes.setdefault(kind, []).append(size)
+            total += 1
             if errors:
                 failed += 1
-                print(f"[doc {i}] ERROR: {', '.join(errors)}")
-            if show and i == 0:
-                print("Triples RDF del primer documento:\n" + nquads)
-    print(f"Documentos: {len(sizes)} | válidos: {len(sizes) - failed} | "
-          f"payload (bytes) min/media/max: {min(sizes)}/"
-          f"{statistics.mean(sizes):.1f}/{max(sizes)}")
+                print(f"[doc {i}, {kind}] ERROR: {', '.join(errors)}")
+            if show and kind not in shown:
+                shown.add(kind)
+                print(f"--- Triples RDF ({kind}, doc {i}):\n" + nquads)
+    print(f"Documentos: {total} | válidos: {total - failed}")
+    for kind, s in sizes.items():
+        print(f"  {kind}: {len(s)} doc(s), payload (bytes) min/media/max: "
+              f"{min(s)}/{statistics.mean(s):.1f}/{max(s)}")
     sys.exit(1 if failed else 0)
 
 

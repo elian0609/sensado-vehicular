@@ -21,6 +21,7 @@ import time
 
 import config
 from semantic.annotator import annotate, serialize
+from semantic.registry import registration_documents
 from sinks.base import JsonlFileSink
 
 log = logging.getLogger("edge_node")
@@ -82,6 +83,11 @@ def main():
     sink = JsonlFileSink(config.OUTBOX_PATH)
     q, stop = queue.Queue(), threading.Event()
     signal.signal(signal.SIGTERM, lambda *_: stop.set())
+
+    # Metadatos de registro: una sola vez al iniciar, antes de la telemetría.
+    for doc in registration_documents():
+        sink.emit(serialize(doc))
+        log.info("KI-1 <- registro %s", doc["@type"])
 
     for s in sensors:
         threading.Thread(target=acquisition_loop, args=(s, q, stop), daemon=True).start()
