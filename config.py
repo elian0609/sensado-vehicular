@@ -9,7 +9,7 @@ en un solo lugar, para que el experimento sea reproducible sin leer el código.
 # REEMPLAZAR antes de la versión final por el dominio definitivo del proyecto
 # (p. ej. una URL de GitHub Pages del repositorio). Solo cambia aquí; ningún
 # otro archivo necesita modificarse.
-PROJECT_NS = "https://github.com/elian0609/sensado-vehicular.git"
+PROJECT_NS = "https://elian0609.github.io/sensado-vehicular/"
 VOCAB_NS = PROJECT_NS + "vocab#"     # prefijo proy: (extensiones propias)
 ID_BASE = PROJECT_NS + "id/"          # @base: resuelve los identificadores compactos
 
