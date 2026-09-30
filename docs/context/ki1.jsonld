@@ -1,9 +1,9 @@
 {
   "@context": {
-    "@base": "https://github.com/elian0609/sensado-vehicular.gitid/",
+    "@base": "https://elian0609.github.io/sensado-vehicular/id/",
     "sosa": "http://www.w3.org/ns/sosa/",
     "xsd": "http://www.w3.org/2001/XMLSchema#",
-    "proy": "https://github.com/elian0609/sensado-vehicular.gitvocab#",
+    "proy": "https://elian0609.github.io/sensado-vehicular/vocab#",
     "sensor_id": {
       "@id": "sosa:madeBySensor",
       "@type": "@id"
