@@ -43,9 +43,22 @@ PLATFORM = {
     "registration_date": "2026-09-24",
 }
 
-# --- Salida hacia KI-1 -------------------------------------------------------
-# Hasta que la Fase 4 defina el transporte (MQTT), la salida de M2 se escribe
-# en un archivo JSON Lines que actúa como bandeja de salida de KI-1.
+# --- KI-1: transporte MQTT (Fase 4) -----------------------------------------
+# El broker (Mosquitto) se ejecuta en el propio nodo edge, por lo que el nombre
+# por defecto es "localhost". Se configura por nombre de dominio, nunca por IP:
+# si el broker se trasladara a otro equipo, basta con cambiar este nombre
+# (p. ej. "edge-node-3b.local" vía mDNS) o pasar --broker al ejecutar.
+MQTT_BROKER_HOST = "localhost"
+MQTT_BROKER_PORT = 1883
+MQTT_CLIENT_ID = "nodo_edge_moto_01"  # único por nodo edge
+MQTT_QOS = 1                          # al menos una vez: sin pérdida de observaciones
+MQTT_KEEPALIVE = 60                   # segundos
+MQTT_TOPIC_ROOT = "vehiculo"          # raíz de la jerarquía de tópicos (sinks/topics.py)
+MQTT_USERNAME = None                  # None: broker sin autenticación (WLAN privada)
+MQTT_PASSWORD = None
+
+# Bandeja en archivo JSON Lines: alternativa a MQTT para pruebas sin broker
+# (python3 main.py --sink file).
 OUTBOX_PATH = "outbox_ki1.jsonl"
 
 assert PROJECT_NS.endswith("/") and "github.com" not in PROJECT_NS, \

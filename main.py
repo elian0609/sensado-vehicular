@@ -7,8 +7,10 @@ Cada sensor muestrea con su propia ventana, en su propio hilo, de modo que un
 sensor de ventana larga (PPD42NS, 30 s) no bloquea a otro más rápido.
 
 Uso:
-  python3 main.py              # hardware real (Raspberry Pi)
-  python3 main.py --simulate   # sin hardware: GPIO simulado (gpiozero MockFactory)
+  python3 main.py                        # hardware real, publica en MQTT (KI-1)
+  python3 main.py --broker otro.local    # broker por nombre de dominio
+  python3 main.py --sink file            # sin broker: bandeja outbox_ki1.jsonl
+  python3 main.py --simulate             # sin hardware: GPIO simulado
 """
 import argparse
 import logging
@@ -23,6 +25,7 @@ import config
 from semantic.annotator import annotate, serialize
 from semantic.registry import registration_documents
 from sinks.base import JsonlFileSink
+from sinks.topics import topic_for
 
 log = logging.getLogger("edge_node")
 
@@ -70,6 +73,9 @@ def main():
     ap.add_argument("--simulate", action="store_true")
     ap.add_argument("--window", type=float, help="sobrescribe la ventana (solo pruebas)")
     ap.add_argument("--max", type=int, help="detener tras N observaciones (solo pruebas)")
+    ap.add_argument("--sink", choices=["mqtt", "file"], default="mqtt",
+                    help="transporte de KI-1 (por defecto: mqtt)")
+    ap.add_argument("--broker", help="nombre de dominio del broker (sobrescribe config)")
     args = ap.parse_args()
 
     logging.basicConfig(level=logging.INFO, stream=sys.stderr,
@@ -80,14 +86,19 @@ def main():
         enable_simulation(config.PPD42NS_GPIO_BCM)
 
     sensors = build_sensors()
-    sink = JsonlFileSink(config.OUTBOX_PATH)
+    if args.sink == "mqtt":
+        from sinks.mqtt import MqttSink
+        sink = MqttSink(host=args.broker)
+    else:
+        sink = JsonlFileSink(config.OUTBOX_PATH)
     q, stop = queue.Queue(), threading.Event()
     signal.signal(signal.SIGTERM, lambda *_: stop.set())
 
     # Metadatos de registro: una sola vez al iniciar, antes de la telemetría.
     for doc in registration_documents():
-        sink.emit(serialize(doc))
-        log.info("KI-1 <- registro %s", doc["@type"])
+        topic, retain = topic_for(doc)
+        sink.emit(serialize(doc), topic, retain)
+        log.info("KI-1 <- registro %s -> %s (retain)", doc["@type"], topic)
 
     for s in sensors:
         threading.Thread(target=acquisition_loop, args=(s, q, stop), daemon=True).start()
@@ -100,11 +111,13 @@ def main():
                 obs = q.get(timeout=1)
             except queue.Empty:
                 continue
-            payload = serialize(annotate(obs))          # M2
-            sink.emit(payload)                          # KI-1
+            doc = annotate(obs)                         # M2
+            payload = serialize(doc)
+            topic, retain = topic_for(doc)
+            sink.emit(payload, topic, retain)           # KI-1
             emitted += 1
-            log.info("KI-1 <- %s %s=%s (%d bytes)", obs.sensor_id,
-                     obs.observed_property, obs.value, len(payload.encode()))
+            log.info("KI-1 <- %s %s=%s (%d bytes) -> %s", obs.sensor_id,
+                     obs.observed_property, obs.value, len(payload.encode()), topic)
             if args.max and emitted >= args.max:
                 break
     except KeyboardInterrupt:

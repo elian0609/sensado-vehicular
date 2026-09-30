@@ -1,0 +1,12 @@
+<?xml version="1.0" standalone='no'?>
+<!DOCTYPE service-group SYSTEM "avahi-service.dtd">
+<!-- Copiar a /etc/avahi/services/ki1-mqtt.service
+     Anuncia el broker de KI-1 por DNS-SD (_mqtt._tcp) en la WLAN del hotspot. -->
+<service-group>
+  <name replace-wildcards="yes">Broker KI-1 en %h</name>
+  <service>
+    <type>_mqtt._tcp</type>
+    <port>1883</port>
+    <txt-record>topic_root=vehiculo</txt-record>
+  </service>
+</service-group>
