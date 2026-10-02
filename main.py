@@ -7,9 +7,9 @@ Cada sensor muestrea con su propia ventana, en su propio hilo, de modo que un
 sensor de ventana larga (PPD42NS, 30 s) no bloquea a otro más rápido.
 
 Uso:
-  python3 main.py                        # hardware real, publica en MQTT (KI-1)
+  python3 main.py                        # hardware real: MQTT (KI-1) + outbox_ki1.jsonl
   python3 main.py --broker otro.local    # broker por nombre de dominio
-  python3 main.py --sink file            # sin broker: bandeja outbox_ki1.jsonl
+  python3 main.py --sink file            # sin broker: solo outbox_ki1.jsonl
   python3 main.py --simulate             # sin hardware: GPIO simulado
 """
 import argparse
@@ -24,7 +24,7 @@ import time
 import config
 from semantic.annotator import annotate, serialize
 from semantic.registry import registration_documents
-from sinks.base import JsonlFileSink
+from sinks.base import FanOutSink, JsonlFileSink
 from sinks.topics import topic_for
 
 log = logging.getLogger("edge_node")
@@ -74,7 +74,8 @@ def main():
     ap.add_argument("--window", type=float, help="sobrescribe la ventana (solo pruebas)")
     ap.add_argument("--max", type=int, help="detener tras N observaciones (solo pruebas)")
     ap.add_argument("--sink", choices=["mqtt", "file"], default="mqtt",
-                    help="transporte de KI-1 (por defecto: mqtt)")
+                    help="transporte de KI-1 (por defecto: mqtt, con copia en "
+                         "outbox_ki1.jsonl)")
     ap.add_argument("--broker", help="nombre de dominio del broker (sobrescribe config)")
     args = ap.parse_args()
 
@@ -86,11 +87,13 @@ def main():
         enable_simulation(config.PPD42NS_GPIO_BCM)
 
     sensors = build_sensors()
+    outbox = JsonlFileSink(config.OUTBOX_PATH)
     if args.sink == "mqtt":
         from sinks.mqtt import MqttSink
-        sink = MqttSink(host=args.broker)
+        # La bandeja se escribe en paralelo: respaldo y referencia de lo publicado.
+        sink = FanOutSink(outbox, MqttSink(host=args.broker))
     else:
-        sink = JsonlFileSink(config.OUTBOX_PATH)
+        sink = outbox
     q, stop = queue.Queue(), threading.Event()
     signal.signal(signal.SIGTERM, lambda *_: stop.set())
 

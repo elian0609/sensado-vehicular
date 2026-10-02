@@ -1,7 +1,7 @@
 # Copiar a /etc/systemd/system/edge-node.service
 [Unit]
 Description=Nodo Edge (M1 + M2) - publicacion en KI-1
-Wants=mosquitto.service time-sync.target
+Wants=mosquitto.service network-online.target time-sync.target
 After=network-online.target mosquitto.service time-sync.target
 
 [Service]

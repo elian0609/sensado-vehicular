@@ -44,15 +44,28 @@ sudo systemctl enable --now mosquitto && sudo systemctl restart mosquitto
 
 # Anuncio del broker por DNS-SD (_mqtt._tcp) para que el gateway lo descubra
 sudo cp deploy/avahi/ki1-mqtt.service /etc/avahi/services/ki1-mqtt.service
+sudo systemctl reload avahi-daemon
+```
+
+El hostname de la Pi debe ser `raspberrypi`: el gateway (app móvil) localiza el
+broker como `raspberrypi.local`. Comprobación desde cualquier equipo de la WLAN:
+```bash
+hostnamectl hostname                    # en la Pi: raspberrypi
+avahi-resolve -n raspberrypi.local      # nombre -> IP por mDNS
+avahi-browse -rt _mqtt._tcp             # anuncio "Broker KI-1 en raspberrypi", puerto 1883
 ```
 
 ## Ejecución
 ```bash
-python3 main.py                              # sensado real, publica en MQTT
+python3 main.py                              # sensado real: MQTT + outbox_ki1.jsonl
 python3 main.py --broker otro-equipo.local   # broker por nombre de dominio
-python3 main.py --sink file                  # sin broker: outbox_ki1.jsonl
+python3 main.py --sink file                  # sin broker: solo outbox_ki1.jsonl
 python3 main.py --simulate --window 3 --max 5    # prueba sin hardware
 ```
+
+Con MQTT, cada documento se escribe también en `outbox_ki1.jsonl`: es el
+registro de lo publicado por el nodo, que en la Fase 6 se compara con lo
+recibido por el gateway por la clave `(sensor_id, observed_property, result_time)`.
 
 Ver lo que publica el nodo (en otra terminal, en la Pi o en un equipo de la WLAN):
 ```bash

@@ -47,7 +47,9 @@ PLATFORM = {
 # El broker (Mosquitto) se ejecuta en el propio nodo edge, por lo que el nombre
 # por defecto es "localhost". Se configura por nombre de dominio, nunca por IP:
 # si el broker se trasladara a otro equipo, basta con cambiar este nombre
-# (p. ej. "edge-node-3b.local" vía mDNS) o pasar --broker al ejecutar.
+# (p. ej. "otro-equipo.local" vía mDNS) o pasar --broker al ejecutar.
+# El hostname de la Pi debe ser "raspberrypi": el gateway (app móvil) localiza
+# el broker como raspberrypi.local.
 MQTT_BROKER_HOST = "localhost"
 MQTT_BROKER_PORT = 1883
 MQTT_CLIENT_ID = "nodo_edge_moto_01"  # único por nodo edge
@@ -57,8 +59,9 @@ MQTT_TOPIC_ROOT = "vehiculo"          # raíz de la jerarquía de tópicos (sink
 MQTT_USERNAME = None                  # None: broker sin autenticación (WLAN privada)
 MQTT_PASSWORD = None
 
-# Bandeja en archivo JSON Lines: alternativa a MQTT para pruebas sin broker
-# (python3 main.py --sink file).
+# Bandeja en archivo JSON Lines: se escribe siempre, en paralelo con MQTT, como
+# respaldo y referencia de lo publicado (Fase 6: comparación con lo recibido
+# por el gateway). Con --sink file es la única salida (pruebas sin broker).
 OUTBOX_PATH = "outbox_ki1.jsonl"
 
 assert PROJECT_NS.endswith("/") and "github.com" not in PROJECT_NS, \
