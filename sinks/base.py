@@ -9,6 +9,7 @@ transporte, sin que M1 ni M2 cambien:
   - FanOutSink: entrega cada documento a varios sinks (MQTT + archivo).
 """
 import logging
+import os
 from abc import ABC, abstractmethod
 
 log = logging.getLogger("edge_node.sink")
@@ -22,14 +23,28 @@ class Ki1Sink(ABC):
 
 
 class JsonlFileSink(Ki1Sink):
-    """Un documento JSON-LD por línea. Ignora tópico y retain."""
+    """
+    Un documento JSON-LD por línea. Ignora tópico y retain.
+
+    Cada línea se fuerza a la tarjeta SD con fsync: en el vehículo el nodo se
+    apaga cortando la alimentación, y con solo flush() las últimas líneas
+    quedaban en la caché del sistema y se perdían (o aparecían como bytes
+    nulos) al volver a encender.
+    """
 
     def __init__(self, path: str):
         self._f = open(path, "a", encoding="utf-8")
+        # Persiste también la entrada del directorio si el archivo es nuevo.
+        dir_fd = os.open(os.path.dirname(os.path.abspath(path)), os.O_RDONLY)
+        try:
+            os.fsync(dir_fd)
+        finally:
+            os.close(dir_fd)
 
     def emit(self, payload: str, topic: str = "", retain: bool = False) -> None:
         self._f.write(payload + "\n")
         self._f.flush()
+        os.fsync(self._f.fileno())
 
     def close(self) -> None:
         self._f.close()
