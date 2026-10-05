@@ -4,7 +4,13 @@ M1 para el Shinyei PPD42NS (variante de un solo canal de salida).
 Mide el Low Pulse Occupancy (LPO): fracción de la ventana en que la salida del
 sensor permanece en nivel bajo. El valor NO se convierte a µg/m³: esa
 calibración es una transformación posterior, explícitamente fuera de esta fase.
+
+raw.quality_flag:
+  "ok"        medición válida.
+  "stuck_low" la señal estuvo en bajo toda la ventana sin ningún pulso: el
+              pin no tiene sensor (desconectado o cable suelto). LPO no válido.
 """
+import logging
 import threading
 import time
 from datetime import datetime, timezone
@@ -13,10 +19,15 @@ from typing import List
 from core.observation import Observation
 from sensors.base import SensorModule
 
+log = logging.getLogger("edge_node.ppd42ns")
+
 
 class PPD42NSSensor(SensorModule):
     OBSERVED_PROPERTY = "low_pulse_occupancy_ratio"
     UNIT = "ratio_0_1"
+    # Fracción mínima de la ventana en bajo, sin pulsos, para declarar la señal
+    # atascada. Con partículas reales el LPO observado no supera ~0.8.
+    STUCK_LOW_MIN_RATIO = 0.99
 
     def __init__(self, sensor_id: str, gpio_bcm: int, window_seconds: float,
                  feature_of_interest: str):
@@ -66,6 +77,13 @@ class PPD42NSSensor(SensorModule):
             pulses = self._pulses
 
         lpo = min(max(low / window, 0.0), 1.0)
+        # Señal en bajo toda la ventana sin ningún flanco: no es una medición,
+        # es el pin sin sensor (desconectado o cable suelto). La observación se
+        # publica igual, por trazabilidad, pero marcada para descartarla.
+        stuck_low = pulses == 0 and lpo >= self.STUCK_LOW_MIN_RATIO
+        if stuck_low:
+            log.warning("%s: señal en bajo toda la ventana (LPO=%.3f, 0 pulsos); "
+                        "¿sensor desconectado?", self.sensor_id, lpo)
         return [Observation(
             sensor_id=self.sensor_id,
             observed_property=self.OBSERVED_PROPERTY,
@@ -78,6 +96,7 @@ class PPD42NSSensor(SensorModule):
                 "low_time_seconds": round(low, 4),
                 "window_seconds": round(window, 3),
                 "gpio_pin_bcm": self.gpio_bcm,
+                "quality_flag": "stuck_low" if stuck_low else "ok",
             },
         )]
 

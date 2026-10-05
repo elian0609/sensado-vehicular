@@ -28,7 +28,7 @@ PPD42NS_METADATA = {
     "sensor_type": "particulate_matter",
     "calibration_params": {"voltage_divider_r1_ohm": 1000,
                            "voltage_divider_r2_ohm": 2000},
-    "install_date": "2026-08-19",     # REEMPLAZAR por la fecha real de montaje
+    "install_date": "2026-10-05",     # montaje definitivo: divisor 1 kΩ/2 kΩ, GND común
     "status": "activo",
 }
 
@@ -39,7 +39,9 @@ OBSERVED_PROPERTIES = {
 PLATFORM = {
     "vehicle_id": "moto_01",
     "vehicle_type": "motocicleta",
-    "route_label": None,              # se define en las pruebas de campo (Fase 6)
+    # Fase 6: poner la etiqueta de la ruta antes de cada sesión de campo
+    # (p. ej. "ruta_centro_01"). Con None no se publica en el registro.
+    "route_label": None,
     "registration_date": "2026-09-24",
 }
 

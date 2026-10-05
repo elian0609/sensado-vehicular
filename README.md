@@ -38,14 +38,27 @@ sudo apt install -y python3-gpiozero python3-lgpio python3-paho-mqtt \
                     mosquitto mosquitto-clients avahi-daemon
 pip3 install pyld --break-system-packages      # solo para validar
 
-# Broker de KI-1 (escucha en la WLAN, persistencia cada 60 s)
+# Broker de KI-1 (escucha en la WLAN, persistencia cada 10 s)
 sudo cp deploy/mosquitto/ki1.conf /etc/mosquitto/conf.d/ki1.conf
 sudo systemctl enable --now mosquitto && sudo systemctl restart mosquitto
 
 # Anuncio del broker por DNS-SD (_mqtt._tcp) para que el gateway lo descubra
 sudo cp deploy/avahi/ki1-mqtt.service /etc/avahi/services/ki1-mqtt.service
 sudo systemctl reload avahi-daemon
+
+# Registros del sistema persistentes: sin esto, journalctl se borra en cada
+# reinicio y no se puede diagnosticar lo ocurrido antes de un corte de energía
+sudo mkdir -p /var/log/journal && sudo systemctl restart systemd-journald
 ```
+
+### Hardware
+- **Alimentación:** 5,1 V / 2,5 A (fuente oficial o equivalente); en el vehículo,
+  convertidor 12 V → 5 V de al menos 3 A. Un puerto USB de laptop no basta: provoca
+  bajo voltaje, caídas del Wi-Fi y lecturas en cero. Comprobación:
+  `vcgencmd get_throttled` debe devolver `throttled=0x0`.
+- **Señal del PPD42NS:** P1 (5 V) → 1 kΩ → GPIO4 (pin 7), con 2 kΩ de GPIO4 a GND,
+  y el GND del sensor unido al de la Pi. Sin la resistencia a GND el pin recibe más
+  de 3,3 V y la señal rebota (miles de pulsos de < 1 ms que no son partículas).
 
 El hostname de la Pi debe ser `raspberrypi`: el gateway (app móvil) localiza el
 broker como `raspberrypi.local`. Comprobación desde cualquier equipo de la WLAN:
@@ -90,3 +103,11 @@ el nodo sigue adquiriendo y entrega lo acumulado al conectarse.
 ## Parámetros críticos
 Todos en `config.py` (namespace, sensor, ventana de muestreo, broker, QoS,
 raíz de tópicos). El broker se indica siempre por nombre de dominio.
+Antes de cada sesión de campo (Fase 6), poner la etiqueta de la ruta en
+`PLATFORM["route_label"]`.
+
+## Calidad de las observaciones
+Cada observación lleva `raw.quality_flag`:
+- `ok`: medición válida.
+- `stuck_low`: la señal estuvo en bajo toda la ventana sin ningún pulso (sensor
+  desconectado o cable suelto). El LPO (≈ 1.0) no es válido y debe descartarse.
