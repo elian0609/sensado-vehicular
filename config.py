@@ -21,6 +21,14 @@ PPD42NS_SENSOR_ID = "ppd42ns_01"
 PPD42NS_GPIO_BCM = 4                  # pin físico 7, tras divisor 1 kΩ / 2 kΩ
 PPD42NS_WINDOW_SECONDS = 30.0         # mínimo recomendado por el fabricante
 
+# --- Reloj de tiempo real DS1302 (tools/rtc_ds1302.py) -----------------------
+# La Pi no tiene reloj propio: sin red arrancaría con la hora del último
+# apagado y los result_time serían falsos. El DS1302 (con pila CR2032) da la
+# hora al arrancar. Interfaz de 3 hilos, alimentado a 3,3 V (pin 17).
+RTC_DS1302_GPIO_CLK = 17              # pin físico 11
+RTC_DS1302_GPIO_DAT = 27              # pin físico 13
+RTC_DS1302_GPIO_RST = 22              # pin físico 15 (CE)
+
 # --- Metadatos de registro (DIV-3) ------------------------------------------
 # Datos de configuración, no mediciones: se emiten una vez al iniciar el nodo.
 PPD42NS_METADATA = {

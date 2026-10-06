@@ -1,0 +1,10 @@
+# Copiar a /etc/systemd/system/rtc-ds1302-guardar.timer
+[Unit]
+Description=Guardar la hora en el RTC DS1302 cada hora (si hay NTP)
+
+[Timer]
+OnBootSec=5min
+OnUnitActiveSec=1h
+
+[Install]
+WantedBy=timers.target

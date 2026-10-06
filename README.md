@@ -59,6 +59,26 @@ sudo mkdir -p /var/log/journal && sudo systemctl restart systemd-journald
 - **Señal del PPD42NS:** P1 (5 V) → 1 kΩ → GPIO4 (pin 7), con 2 kΩ de GPIO4 a GND,
   y el GND del sensor unido al de la Pi. Sin la resistencia a GND el pin recibe más
   de 3,3 V y la señal rebota (miles de pulsos de < 1 ms que no son partículas).
+- **Reloj de tiempo real DS1302** (con pila CR2032): la Pi no tiene reloj propio y
+  sin red arrancaría con la hora del último apagado. Conexión, a 3,3 V:
+  VCC → pin 17, GND → pin 9, CLK → pin 11 (GPIO17), DAT → pin 13 (GPIO27),
+  RST → pin 15 (GPIO22). Los pines se configuran en `config.py`.
+
+### Reloj de tiempo real (DS1302)
+`tools/rtc_ds1302.py` lee y escribe el DS1302 por GPIO (no usa I2C ni requiere
+controlador del kernel). El RTC guarda la hora en UTC.
+```bash
+python3 -m tools.rtc_ds1302 leer       # hora del RTC frente a la del sistema
+python3 -m tools.rtc_ds1302 guardar    # RTC <- sistema (solo con NTP sincronizado)
+
+# Servicios: al arrancar sin internet, sistema <- RTC antes de que empiece la
+# adquisición; cada hora, si hay NTP, RTC <- sistema (corrige su deriva).
+sudo cp deploy/systemd/rtc-ds1302.service deploy/systemd/rtc-ds1302-guardar.* /etc/systemd/system/
+sudo systemctl daemon-reload
+sudo systemctl enable rtc-ds1302.service rtc-ds1302-guardar.timer
+```
+El DS1302 se desvía ~1–2 min al mes: conviene que la Pi tenga internet de vez en
+cuando (p. ej. en casa) para que el temporizador lo corrija.
 
 El hostname de la Pi debe ser `raspberrypi`: el gateway (app móvil) localiza el
 broker como `raspberrypi.local`. Comprobación desde cualquier equipo de la WLAN:

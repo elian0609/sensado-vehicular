@@ -1,0 +1,11 @@
+# Copiar a /etc/systemd/system/rtc-ds1302-guardar.service (lo lanza el .timer)
+# Si la hora del sistema está sincronizada por NTP, la copia al RTC DS1302
+# para corregir su deriva (~1-2 min/mes). Sin NTP no escribe: el RTC es la
+# referencia y no debe sobrescribirse con una hora que vino de él mismo.
+[Unit]
+Description=Guardar la hora del sistema en el RTC DS1302
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/elian-trelles/sensado-vehicular
+ExecStart=/usr/bin/python3 -m tools.rtc_ds1302 guardar

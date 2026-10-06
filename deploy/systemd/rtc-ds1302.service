@@ -1,0 +1,18 @@
+# Copiar a /etc/systemd/system/rtc-ds1302.service
+# Al arrancar sin internet, pone la hora del sistema desde el RTC DS1302 antes
+# de que empiece la adquisición, para que los result_time sean correctos.
+# Con NTP disponible no hace nada (systemd-timesyncd corrige la hora).
+[Unit]
+Description=Hora del sistema desde el RTC DS1302
+DefaultDependencies=no
+After=local-fs.target
+Before=systemd-timesyncd.service time-sync.target edge-node.service
+
+[Service]
+Type=oneshot
+WorkingDirectory=/home/elian-trelles/sensado-vehicular
+ExecStart=/usr/bin/python3 -m tools.rtc_ds1302 ajustar
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target
