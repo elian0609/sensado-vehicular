@@ -16,13 +16,13 @@ Uso (como root, desde los servicios de deploy/systemd/):
   python3 -m tools.rtc_ds1302 guardar --forzar   # escribe aunque no haya NTP (puesta en hora manual)
 """
 import argparse
-import subprocess
 import sys
 import time
 from datetime import datetime, timezone
 from typing import List, Optional
 
 import config
+from core.clock import ntp_synchronized
 
 # Comandos de ráfaga (burst) del DS1302: 7 registros de reloj + control.
 _CLOCK_BURST_READ = 0xBF
@@ -139,12 +139,6 @@ class DS1302:
 
     def close(self):
         self._lg.gpiochip_close(self._h)
-
-
-def ntp_synchronized() -> bool:
-    out = subprocess.run(["timedatectl", "show", "-p", "NTPSynchronized", "--value"],
-                         capture_output=True, text=True)
-    return out.stdout.strip() == "yes"
 
 
 def set_system_clock(dt: datetime):

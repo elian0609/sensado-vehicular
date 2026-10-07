@@ -14,11 +14,13 @@ import logging
 import socket
 import threading
 import time
+from typing import Callable, Optional
 
 import paho.mqtt.client as mqtt
 
 import config
 from sinks.base import Ki1Sink
+from sinks.topics import gateway_time_topic
 
 log = logging.getLogger("edge_node.mqtt")
 
@@ -37,10 +39,13 @@ def _new_client(client_id: str) -> mqtt.Client:
 
 
 class MqttSink(Ki1Sink):
-    def __init__(self, host: str = None, port: int = None):
+    def __init__(self, host: str = None, port: int = None,
+                 on_gateway_time: Optional[Callable[[bytes], object]] = None):
+        """on_gateway_time: recibe la hora que publica el gateway (core/clock.py)."""
         self.host = host or config.MQTT_BROKER_HOST
         self.port = port or config.MQTT_BROKER_PORT
         self.qos = config.MQTT_QOS
+        self._on_gateway_time = on_gateway_time
         self._connected = threading.Event()
         self._closing = False
 
@@ -51,6 +56,7 @@ class MqttSink(Ki1Sink):
         self._client.reconnect_delay_set(min_delay=1, max_delay=30)
         self._client.on_connect = self._on_connect
         self._client.on_disconnect = self._on_disconnect
+        self._client.on_message = self._on_message
 
         try:
             log.info("Broker %s:%d resuelve a %s", self.host, self.port,
@@ -70,6 +76,15 @@ class MqttSink(Ki1Sink):
             return
         self._connected.set()
         log.info("Conectado al broker %s:%d", self.host, self.port)
+        if self._on_gateway_time:
+            client.subscribe(gateway_time_topic(), qos=0)
+
+    def _on_message(self, client, userdata, message):
+        if message.topic == gateway_time_topic() and self._on_gateway_time:
+            try:
+                self._on_gateway_time(message.payload)
+            except Exception:
+                log.exception("Fallo al procesar la hora del gateway")
 
     def _on_disconnect(self, client, userdata, *args):
         self._connected.clear()

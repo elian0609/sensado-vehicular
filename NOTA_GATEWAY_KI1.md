@@ -136,6 +136,63 @@ upsert con `ConflictAlgorithm.replace` los volvía a marcar `synced = 0` y se
 reenviaban a la nube cada vez. Ahora `metadata_local_datasource.dart` solo
 reemplaza la fila si el `json_payload` cambió.
 
+### A9. Geolocalización por `result_time` (rama `feat/geolocalizacion-result-time`)
+
+**Problema:** la app asignaba a cada observación la posición del teléfono en el
+momento de **recibirla**. Tras una desconexión de KI-1, el broker entrega en
+ráfaga las observaciones acumuladas, y todas quedaban en el punto de
+reconexión: con la moto a 30 km/h, 5 min sin conexión son 10 observaciones
+hasta 2,5 km fuera de su lugar.
+
+**Por qué en H3 (M3):** es el único nodo con GPS, y el enriquecimiento espacial
+ya es responsabilidad de M3. Hacerlo en H4 obligaría a subir aparte la
+trayectoria y dejaría las observaciones sin posición hasta tener internet.
+
+**Cambio:**
+- `location/domain/position_history.dart` (nuevo): trayectoria GPS reciente
+  (26 h, cubre la cola del broker). Para un instante t interpola entre las dos
+  posiciones que lo rodean (si distan ≤ 60 s), o usa la más cercana dentro de
+  30 s; si no hay ninguna, no asigna posición.
+- `geolocator_location_service.dart`: una posición **cada 5 s aunque el teléfono
+  esté quieto** (antes solo al moverse 1 m), para que un hueco en la trayectoria
+  signifique "sin señal GPS" y no "parado". Cada posición se añade al historial.
+- `mqtt_edge_receiver.dart`: busca la posición en la trayectoria para el
+  `result_time`. Solo una observación medida hace menos de 30 s y sin
+  trayectoria todavía usa la posición actual. En otro caso se guarda **sin
+  coordenadas** antes que con unas falsas.
+- Cada observación lleva `position_source`: `trayectoria_interpolada`,
+  `trayectoria_cercana`, `actual` o `no_disponible`.
+
+**Requisito:** el reloj del nodo debe ser correcto, porque se compara el
+`result_time` (hora del nodo) con la hora GPS. Lo garantiza el RTC DS1302 del
+nodo edge.
+
+**Limitación:** la trayectoria está en memoria. Si Android cerrara la app
+durante una desconexión, las observaciones acumuladas quedarían sin posición
+(`no_disponible`), nunca con una posición errónea. El servicio en primer plano
+(A3) reduce ese riesgo.
+
+### A10. La app publica la hora del teléfono (rama `feat/hora-gateway-ki1`)
+
+**Por qué:** el RTC DS1302 del nodo deriva ~1-2 s por día, y la
+geolocalización por `result_time` (A9) compara la hora del nodo con la del GPS:
+1 s de desfase ≈ 8 m a 30 km/h. Sin internet en campo, el nodo no puede
+corregirse por NTP.
+
+**Cambio:**
+- `mqtt_edge_receiver.dart`: al conectarse, y luego cada 10 min
+  (`AppConstants.gatewayTimePublishInterval`), publica en
+  **`vehiculo/gateway/hora`** (QoS 0, sin retain):
+  `{"utc": "<hora UTC del teléfono>", "fuente": "telefono"}`.
+- La app ignora ese tópico al recibir (le llega por su suscripción a
+  `vehiculo/#`).
+- Es el **primer mensaje de la app hacia el nodo**: KI-1 pasa a ser
+  bidireccional en este único tópico.
+
+**En el nodo** (`core/clock.py`): si no tiene NTP y el desfase supera 1 s,
+corrige su reloj y el RTC (nunca retrocede más de 20 s). Cada observación
+indica en `raw.clock_source` si la hora venía de `ntp`, `gateway` o `rtc`.
+
 ### Pruebas
 
 - `flutter analyze`: sin problemas.
@@ -180,13 +237,12 @@ La app ya conserva `raw` completo en SQLite y lo envía a KI-2. Queda decidir si
 la app debe **mostrar un aviso** cuando llega `stuck_low`, en lugar de presentar
 1.0 como si fuera una medición, y si el backend debe excluir esas observaciones.
 
-### B2. Sincronización de la hora del nodo
+### ~~B2. Sincronización de la hora del nodo~~ (resuelto en el nodo edge)
 
-La Raspberry Pi no tiene reloj de hardware. Si arranca sin internet, su hora es
-la del último apagado y los `result_time` salen mal. Está en evaluación: un
-módulo RTC DS3231, o que la app publique la hora del teléfono por MQTT para que
-el nodo ajuste su reloj. Si se elige la segunda opción, la app tendrá que
-publicar en un tópico nuevo (KI-1 pasaría a ser bidireccional).
+Resuelto con un RTC DS1302 en la Raspberry Pi (`tools/rtc_ds1302.py` y los
+servicios `rtc-ds1302*`). Prueba del 2026-10-06: la Pi arrancó sin internet
+tras 10 min apagada y el RTC corrigió la hora (+13 min 53 s) antes de que
+empezara la adquisición. La app no necesita cambios por esto.
 
 ### B3. (Propuesta) Media de 2 minutos en la pantalla principal
 

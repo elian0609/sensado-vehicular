@@ -15,12 +15,13 @@ PPD42NS --GPIO4--> M1 (sensors/ppd42ns.py, hilo propio, ventana 30 s)
 
 ## Contrato MQTT de KI-1
 
-| Mensaje | Tópico | QoS | Retain |
-|---|---|---|---|
-| Telemetría | `vehiculo/sensor/{sensor_id}/observacion` | 1 | no |
-| Registro de plataforma | `vehiculo/plataforma/registro` | 1 | sí |
-| Registro de propiedad | `vehiculo/propiedad/{property_name}/registro` | 1 | sí |
-| Registro de sensor | `vehiculo/sensor/{sensor_id}/registro` | 1 | sí |
+| Mensaje | Tópico | Sentido | QoS | Retain |
+|---|---|---|---|---|
+| Telemetría | `vehiculo/sensor/{sensor_id}/observacion` | nodo → gateway | 1 | no |
+| Registro de plataforma | `vehiculo/plataforma/registro` | nodo → gateway | 1 | sí |
+| Registro de propiedad | `vehiculo/propiedad/{property_name}/registro` | nodo → gateway | 1 | sí |
+| Registro de sensor | `vehiculo/sensor/{sensor_id}/registro` | nodo → gateway | 1 | sí |
+| Hora del teléfono | `vehiculo/gateway/hora` | gateway → nodo | 0 | no |
 
 - Broker: puerto 1883, MQTT v3.1.1, sin autenticación (WLAN privada del hotspot).
 - La carga útil de cada mensaje es el documento JSON-LD 1.1 del DIV-3.
@@ -29,6 +30,12 @@ PPD42NS --GPIO4--> M1 (sensors/ppd42ns.py, hilo propio, ventana 30 s)
   esté desconectado.
 - Los registros pueden llegar repetidos (se reenvían al volver a suscribirse):
   el gateway debe tratarlos como actualización por identificador, no como alta.
+- Hora del teléfono: `{"utc": "2026-10-06T23:10:05.123Z", "fuente": "telefono"}`,
+  publicada por el gateway al conectarse y cada 10 min. Si el nodo no tiene NTP,
+  corrige su reloj y el RTC cuando el desfase supera 1 s (nunca retrocede más de
+  20 s, para no repetir `result_time`). Ver `core/clock.py`.
+- Cada observación indica en `raw.clock_source` de dónde venía la hora del nodo:
+  `ntp`, `gateway` (corregida o confirmada en las últimas 6 h) o `rtc`.
 
 ## Instalación en la Raspberry Pi
 ```bash

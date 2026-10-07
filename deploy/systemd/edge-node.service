@@ -6,6 +6,9 @@ After=network-online.target mosquitto.service time-sync.target
 
 [Service]
 User=elian-trelles
+# Único privilegio extra: ajustar el reloj del sistema con la hora del gateway
+# cuando no hay NTP (core/clock.py). El nodo no se ejecuta como root.
+AmbientCapabilities=CAP_SYS_TIME
 WorkingDirectory=/home/elian-trelles/sensado-vehicular
 ExecStart=/usr/bin/python3 main.py
 Restart=always

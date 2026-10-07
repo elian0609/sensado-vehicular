@@ -22,6 +22,7 @@ import threading
 import time
 
 import config
+from core.clock import ClockSync
 from semantic.annotator import annotate, serialize
 from semantic.registry import registration_documents
 from sinks.base import FanOutSink, JsonlFileSink
@@ -87,11 +88,14 @@ def main():
         enable_simulation(config.PPD42NS_GPIO_BCM)
 
     sensors = build_sensors()
+    clock = ClockSync()
     outbox = JsonlFileSink(config.OUTBOX_PATH)
     if args.sink == "mqtt":
         from sinks.mqtt import MqttSink
         # La bandeja se escribe en paralelo: respaldo y referencia de lo publicado.
-        sink = FanOutSink(outbox, MqttSink(host=args.broker))
+        # Sin internet, la hora del gateway corrige el reloj del nodo.
+        sink = FanOutSink(outbox, MqttSink(host=args.broker,
+                                           on_gateway_time=clock.on_gateway_time))
     else:
         sink = outbox
     q, stop = queue.Queue(), threading.Event()
@@ -114,7 +118,7 @@ def main():
                 obs = q.get(timeout=1)
             except queue.Empty:
                 continue
-            doc = annotate(obs)                         # M2
+            doc = annotate(obs, clock_source=clock.source())   # M2
             payload = serialize(doc)
             topic, retain = topic_for(doc)
             sink.emit(payload, topic, retain)           # KI-1

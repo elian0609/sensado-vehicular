@@ -29,6 +29,14 @@ RTC_DS1302_GPIO_CLK = 17              # pin físico 11
 RTC_DS1302_GPIO_DAT = 27              # pin físico 13
 RTC_DS1302_GPIO_RST = 22              # pin físico 15 (CE)
 
+# --- Corrección de la hora con el gateway (core/clock.py) --------------------
+# Sin internet, la app publica la hora del teléfono en KI-1 y el nodo corrige
+# su reloj (y el RTC) si se desvió. Con NTP sincronizado no se aplica.
+CLOCK_SYNC_MIN_OFFSET_S = 1.0         # desfase por debajo del cual no se toca
+CLOCK_SYNC_MAX_BACKWARD_S = 20        # retroceso máximo (más repetiría result_time)
+CLOCK_GATEWAY_VALID_S = 6 * 3600      # una corrección del gateway vale 6 h
+CLOCK_MIN_VALID_YEAR = 2026
+
 # --- Metadatos de registro (DIV-3) ------------------------------------------
 # Datos de configuración, no mediciones: se emiten una vez al iniciar el nodo.
 PPD42NS_METADATA = {

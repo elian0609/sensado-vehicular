@@ -5,6 +5,7 @@ Jerarquía de tópicos MQTT de KI-1 (Fase 4).
   Registro:    {raíz}/plataforma/registro                      (retain)
                {raíz}/propiedad/{property_name}/registro       (retain)
                {raíz}/sensor/{sensor_id}/registro              (retain)
+  Hora:        {raíz}/gateway/hora   gateway -> nodo, QoS 0, sin retain
 
 Los metadatos de registro se publican con retain para que un gateway que se
 suscriba después del arranque del nodo edge los reciba igualmente.
@@ -20,6 +21,11 @@ def _segment(value: str) -> str:
     if not value or _INVALID & set(value):
         raise ValueError(f"Identificador no válido como segmento de tópico: {value!r}")
     return value
+
+
+def gateway_time_topic() -> str:
+    """Hora del teléfono, publicada por la app (gateway -> nodo, QoS 0, sin retain)."""
+    return f"{config.MQTT_TOPIC_ROOT}/gateway/hora"
 
 
 def topic_for(doc: Dict[str, Any]) -> Tuple[str, bool]:
