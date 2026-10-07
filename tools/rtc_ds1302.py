@@ -18,7 +18,7 @@ Uso (como root, desde los servicios de deploy/systemd/):
 import argparse
 import sys
 import time
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional
 
 import config
@@ -137,6 +137,32 @@ class DS1302:
         self._transaction(_CONTROL_WRITE, [0x00])                       # quita WP
         self._transaction(_CLOCK_BURST_WRITE, encode_clock(dt) + [0x80])  # hora + WP
 
+    def write_now(self) -> datetime:
+        """Escribe la hora actual del sistema alineada al segundo. El DS1302 solo
+        guarda segundos enteros: escribir en cualquier instante perdería la
+        fracción (hasta 1 s), así que se espera al inicio del siguiente segundo."""
+        now = datetime.now(timezone.utc)
+        time.sleep(1 - now.microsecond / 1e6)
+        target = now.replace(microsecond=0) + timedelta(seconds=1)
+        self.write(target)
+        return target
+
+    def read_on_tick(self, timeout: float = 1.5) -> Optional[datetime]:
+        """Lee la hora justo cuando el RTC cambia de segundo: en ese instante la
+        fracción es ~0, así que la hora leída es exacta (no hasta 1 s atrasada)."""
+        first = self.read()
+        if first is None:
+            return None
+        deadline = time.monotonic() + timeout
+        while time.monotonic() < deadline:
+            current = self.read()
+            if current is None:
+                return None
+            if current != first:
+                return current
+            time.sleep(0.002)
+        return first
+
     def close(self):
         self._lg.gpiochip_close(self._h)
 
@@ -157,20 +183,22 @@ def main() -> int:
     try:
         if args.accion == "leer":
             raw = rtc.read_raw()
-            dt = decode_clock(raw)
             print("registros:", " ".join(f"{b:02x}" for b in raw))
+            dt = rtc.read_on_tick() if decode_clock(raw) else None
+            system = datetime.now(timezone.utc)
             print("RTC:", dt.isoformat() if dt else "sin hora válida")
-            print("sistema:", datetime.now(timezone.utc).isoformat(timespec="seconds"))
+            print("sistema:", system.isoformat(timespec="milliseconds"))
+            if dt:
+                print(f"desfase RTC - sistema: {(dt - system).total_seconds() * 1000:+.0f} ms")
             return 0 if dt else 1
 
         if args.accion == "guardar":
             if not (args.forzar or ntp_synchronized()):
                 print("NTP no sincronizado: no se escribe el RTC (él es la referencia)")
                 return 0
-            now = datetime.now(timezone.utc)
-            rtc.write(now)
+            written = rtc.write_now()
             check = rtc.read()
-            if check is None or abs((check - now).total_seconds()) > 2:
+            if check is None or abs((check - written).total_seconds()) > 2:
                 print(f"ERROR: verificación fallida (leído: {check})", file=sys.stderr)
                 return 1
             print("RTC <- sistema:", check.isoformat())
@@ -180,7 +208,7 @@ def main() -> int:
         if ntp_synchronized():
             print("NTP sincronizado: no se toca la hora del sistema")
             return 0
-        dt = rtc.read()
+        dt = rtc.read_on_tick()
         if dt is None:
             print("ERROR: el RTC no tiene una hora válida; la hora del sistema "
                   "no es fiable hasta sincronizar por NTP", file=sys.stderr)

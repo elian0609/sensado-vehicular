@@ -36,12 +36,14 @@ def _set_system_clock(dt: datetime) -> None:
     time.clock_settime(time.CLOCK_REALTIME, dt.timestamp())
 
 
-def _write_rtc(dt: datetime) -> None:
+def _write_rtc(_dt: datetime) -> None:
+    # Se llama justo después de poner el reloj del sistema en _dt: se escribe la
+    # hora del sistema alineada al segundo (write_now) para no perder la fracción.
     from tools.rtc_ds1302 import DS1302      # import tardío: GPIO solo al corregir
     rtc = DS1302(config.RTC_DS1302_GPIO_CLK, config.RTC_DS1302_GPIO_DAT,
                  config.RTC_DS1302_GPIO_RST)
     try:
-        rtc.write(dt)
+        rtc.write_now()
     finally:
         rtc.close()
 
