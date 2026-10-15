@@ -4,6 +4,7 @@ Jerarquía de tópicos MQTT de KI-1 (Fase 4).
   Telemetría:  {raíz}/sensor/{sensor_id}/observacion           (sin retain)
   Registro:    {raíz}/plataforma/registro                      (retain)
                {raíz}/propiedad/{property_name}/registro       (retain)
+               {raíz}/foi/{feature_id}/registro                (retain, ADR-008)
                {raíz}/sensor/{sensor_id}/registro              (retain)
   Hora:        {raíz}/gateway/hora   gateway -> nodo, QoS 0, sin retain
 
@@ -38,6 +39,8 @@ def topic_for(doc: dict[str, Any]) -> tuple[str, bool]:
         return f"{root}/sensor/{_segment(doc['sensor_id'])}/registro", True
     if kind == "sosa:Platform":
         return f"{root}/plataforma/registro", True
+    if kind == "sosa:FeatureOfInterest":
+        return f"{root}/foi/{_segment(doc['feature_id'])}/registro", True
     if kind == "sosa:ObservableProperty":
         return f"{root}/propiedad/{_segment(doc['property_name'])}/registro", True
     raise ValueError(f"Tipo de documento sin tópico asignado: {kind!r}")

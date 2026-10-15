@@ -16,7 +16,8 @@ from semantic.context import KI1_TELEMETRY_CONTEXT
 
 SOSA = "http://www.w3.org/ns/sosa/"
 
-# (término, dominio, rango, etiqueta, comentario) — los 10 términos del DIV-3
+# (término, dominio, rango, etiqueta, comentario) — los 10 términos del DIV-3 y
+# featureKind (registro sosa:FeatureOfInterest, ADR-008)
 TERMS = [
     (
         "unit",
@@ -87,6 +88,13 @@ TERMS = [
         "xsd:date",
         "fecha de registro",
         "Fecha de alta de la plataforma dentro del sistema.",
+    ),
+    (
+        "featureKind",
+        "sosa:FeatureOfInterest",
+        "xsd:string",
+        "tipo de objeto de interés",
+        "Categoría del objeto de interés observado (p. ej. aire ambiente en el punto del sensor).",
     ),
 ]
 

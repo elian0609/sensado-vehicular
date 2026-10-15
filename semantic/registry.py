@@ -6,12 +6,18 @@ El documento del sensor incluye sosa:isHostedBy, que materializa la relación
 'monta' (Plataforma -> Sensor) del DIV-2 y completa la PC2 ("¿en qué
 plataforma se encuentra alojado el sensor?") sin repetir el vehículo en cada
 observación.
+
+El documento sosa:FeatureOfInterest (ADR-008) da entidad al objeto de cada
+observación ("aire ambiente en el punto del sensor"): feature_of_interest de la
+telemetría es una IRI que apunta a este nodo (PC6 de la tesis).
 """
 
 from typing import Any
 
 import config
 from semantic.context import SOSA, XSD
+
+RDFS = "http://www.w3.org/2000/01/rdf-schema#"
 
 _BASE = {"@base": config.ID_BASE, "sosa": SOSA, "xsd": XSD, "proy": config.VOCAB_NS}
 
@@ -38,6 +44,14 @@ PROPERTY_CONTEXT = {
     **_BASE,
     "property_name": "@id",
     "unit": "proy:defaultUnit",
+}
+
+FOI_CONTEXT = {
+    **_BASE,
+    "rdfs": RDFS,
+    "feature_id": "@id",
+    "feature_kind": "proy:featureKind",
+    "description": "rdfs:comment",
 }
 
 
@@ -70,9 +84,20 @@ def property_document(name: str, unit: str) -> dict[str, Any]:
     }
 
 
+def foi_document(feature_id: str, metadata: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "@context": FOI_CONTEXT,
+        "@type": "sosa:FeatureOfInterest",
+        "feature_id": feature_id,
+        **metadata,
+    }
+
+
 def registration_documents() -> list[dict[str, Any]]:
-    """Todos los metadatos del nodo, en orden: plataforma, propiedades, sensores."""
+    """Todos los metadatos del nodo, en orden: plataforma, propiedades, objetos de
+    interés (FOI) y sensores."""
     docs = [platform_document()]
     docs += [property_document(n, p["unit"]) for n, p in config.OBSERVED_PROPERTIES.items()]
+    docs += [foi_document(f, m) for f, m in config.FEATURES_OF_INTEREST.items()]
     docs.append(sensor_document(config.PPD42NS_SENSOR_ID, config.PPD42NS_METADATA))
     return docs

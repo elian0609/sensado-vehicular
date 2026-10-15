@@ -16,6 +16,15 @@ ID_BASE = PROJECT_NS + "id/"  # @base: resuelve los identificadores compactos
 # --- Observación (DIV-2) -----------------------------------------------------
 DEFAULT_FEATURE_OF_INTEREST = "ambient_air_at_device"
 
+# Objetos de interés publicados como registro sosa:FeatureOfInterest (ADR-008).
+# feature_of_interest de cada observación es una IRI que apunta a uno de ellos.
+FEATURES_OF_INTEREST = {
+    DEFAULT_FEATURE_OF_INTEREST: {
+        "feature_kind": "aire_ambiente",
+        "description": "Aire ambiente en el punto de toma del sensor, a bordo de la plataforma",
+    },
+}
+
 # --- Sensor PPD42NS (H1 -> H2) ----------------------------------------------
 PPD42NS_SENSOR_ID = "ppd42ns_01"
 PPD42NS_GPIO_BCM = 4  # pin físico 7, tras divisor 1 kΩ / 2 kΩ

@@ -79,3 +79,10 @@ proy:registrationDate a owl:DatatypeProperty ;
     rdfs:domain sosa:Platform ;
     rdfs:range xsd:date ;
     rdfs:isDefinedBy <https://elian0609.github.io/sensado-vehicular/vocab> .
+
+proy:featureKind a owl:DatatypeProperty ;
+    rdfs:label "tipo de objeto de interés"@es ;
+    rdfs:comment "Categoría del objeto de interés observado (p. ej. aire ambiente en el punto del sensor)."@es ;
+    rdfs:domain sosa:FeatureOfInterest ;
+    rdfs:range xsd:string ;
+    rdfs:isDefinedBy <https://elian0609.github.io/sensado-vehicular/vocab> .

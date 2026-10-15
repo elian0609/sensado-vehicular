@@ -20,7 +20,10 @@
       "@id": "sosa:resultTime",
       "@type": "xsd:dateTimeStamp"
     },
-    "feature_of_interest": "sosa:hasFeatureOfInterest",
+    "feature_of_interest": {
+      "@id": "sosa:hasFeatureOfInterest",
+      "@type": "@id"
+    },
     "unit": "proy:unit"
   }
 }

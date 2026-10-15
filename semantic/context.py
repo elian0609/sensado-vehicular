@@ -6,6 +6,11 @@ Corrige respecto al borrador del DIV-3:
   - declara @base, sin el cual los identificadores compactos quedan como IRIs
     relativas que se descartan al convertir a RDF;
   - tipa result_time como xsd:dateTimeStamp (rango exigido por sosa:resultTime).
+
+Contrato KI-1 v2 (MCS_BACKEND/contracts/v2, ADR-008): feature_of_interest es una
+IRI (sosa:hasFeatureOfInterest es una propiedad de objeto), no un literal. Este
+diccionario debe ser idéntico a contracts/v2/context/ki1-observation.context.jsonld
+y a docs/context/ki1.jsonld (tests/test_contract_ki1.py lo comprueba).
 """
 
 import config
@@ -22,7 +27,7 @@ KI1_TELEMETRY_CONTEXT = {
     "observed_property": {"@id": "sosa:observedProperty", "@type": "@id"},
     "value": {"@id": "sosa:hasSimpleResult", "@type": "xsd:double"},
     "result_time": {"@id": "sosa:resultTime", "@type": "xsd:dateTimeStamp"},
-    "feature_of_interest": "sosa:hasFeatureOfInterest",
+    "feature_of_interest": {"@id": "sosa:hasFeatureOfInterest", "@type": "@id"},
     "unit": "proy:unit",
     # 'raw' se omite deliberadamente: fuera de la expansión semántica.
 }
