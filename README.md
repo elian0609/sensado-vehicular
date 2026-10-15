@@ -13,18 +13,35 @@ PPD42NS --GPIO4--> M1 (sensors/ppd42ns.py, hilo propio, ventana 30 s)
                                               Gateway local (app móvil, H3)
 ```
 
-## Contrato MQTT de KI-1
+## Contrato KI-1 v2
+
+El nodo emite el **contrato KI-1 v2.0.0**, definido y versionado en
+[`MCS_BACKEND/contracts/v2`](https://github.com/LeandroFreireGH/MCS_BACKEND/tree/master/contracts)
+(esquemas JSON Schema, `@context` y fixtures). Cambios frente a v1 (incompatibles, ver `CHANGELOG.md`):
+
+- Cada observación lleva **`@id`** según ADR-002:
+  `obs/{sensor_id}/{observed_property}/{result_time UTC en formato YYYYMMDDTHHMMSSZ}`, relativo a
+  `@base`. La regla vive solo en `semantic/identity.py`; el backend aplica la misma.
+- `feature_of_interest` es una **IRI** (`{"@id": "sosa:hasFeatureOfInterest", "@type": "@id"}`,
+  ADR-008), y se publica un **registro `sosa:FeatureOfInterest`** para ella.
+- `raw.quality_flag` y `raw.clock_source` son obligatorios.
+
+Las fixtures del contrato se copian a `tests/fixtures/contracts/` con
+`MCS_BACKEND/contracts/tools/sync_fixtures.py sync --dest ../edge_node/tests/fixtures/contracts --yes`;
+`tests/test_fixtures_manifest.py` falla si alguien las edita a mano.
+
+### Tópicos
 
 | Mensaje | Tópico | Sentido | QoS | Retain |
 |---|---|---|---|---|
 | Telemetría | `vehiculo/sensor/{sensor_id}/observacion` | nodo → gateway | 1 | no |
 | Registro de plataforma | `vehiculo/plataforma/registro` | nodo → gateway | 1 | sí |
 | Registro de propiedad | `vehiculo/propiedad/{property_name}/registro` | nodo → gateway | 1 | sí |
+| Registro de objeto de interés (**nuevo en v2**) | `vehiculo/foi/{feature_id}/registro` | nodo → gateway | 1 | sí |
 | Registro de sensor | `vehiculo/sensor/{sensor_id}/registro` | nodo → gateway | 1 | sí |
 | Hora del teléfono | `vehiculo/gateway/hora` | gateway → nodo | 0 | no |
 
 - Broker: puerto 1883, MQTT v3.1.1, sin autenticación (WLAN privada del hotspot).
-- La carga útil de cada mensaje es el documento JSON-LD 1.1 del DIV-3.
 - El gateway debe suscribirse a `vehiculo/#` con QoS 1, un `client_id` fijo y
   `clean_session = false`, para que el broker le guarde lo publicado mientras
   esté desconectado.
@@ -37,6 +54,50 @@ PPD42NS --GPIO4--> M1 (sensors/ppd42ns.py, hilo propio, ventana 30 s)
 - Cada observación indica en `raw.clock_source` de dónde venía la hora del nodo:
   `ntp`, `gateway` (corregida o confirmada en las últimas 6 h) o `rtc`.
 
+### Ejemplos reales (salida de `annotate()` y `registration_documents()`)
+
+Telemetría (en el canal viaja compacta en una línea: **973 B**; v1 ocupaba 885 B):
+
+```json
+{
+  "@context": {
+    "@base": "https://elian0609.github.io/sensado-vehicular/id/",
+    "sosa": "http://www.w3.org/ns/sosa/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "proy": "https://elian0609.github.io/sensado-vehicular/vocab#",
+    "sensor_id": {"@id": "sosa:madeBySensor", "@type": "@id"},
+    "observed_property": {"@id": "sosa:observedProperty", "@type": "@id"},
+    "value": {"@id": "sosa:hasSimpleResult", "@type": "xsd:double"},
+    "result_time": {"@id": "sosa:resultTime", "@type": "xsd:dateTimeStamp"},
+    "feature_of_interest": {"@id": "sosa:hasFeatureOfInterest", "@type": "@id"},
+    "unit": "proy:unit"
+  },
+  "@id": "obs/ppd42ns_01/low_pulse_occupancy_ratio/20261008T161739Z",
+  "@type": "sosa:Observation",
+  "sensor_id": "ppd42ns_01",
+  "observed_property": "low_pulse_occupancy_ratio",
+  "value": 0.133345,
+  "unit": "ratio_0_1",
+  "result_time": "2026-10-08T16:17:39Z",
+  "feature_of_interest": "ambient_air_at_device",
+  "raw": {"pulse_count": 38, "low_time_seconds": 4.0004, "window_seconds": 30.0,
+          "gpio_pin_bcm": 4, "quality_flag": "ok", "clock_source": "gateway"}
+}
+```
+
+Registros (cada uno lleva además su `@context`: `SENSOR_CONTEXT`, `PLATFORM_CONTEXT`,
+`PROPERTY_CONTEXT` y `FOI_CONTEXT` en `semantic/registry.py`):
+
+```json
+{"@type": "sosa:Platform", "vehicle_id": "moto_01", "vehicle_type": "motocicleta", "registration_date": "2026-09-24"}
+{"@type": "sosa:ObservableProperty", "property_name": "low_pulse_occupancy_ratio", "unit": "ratio_0_1"}
+{"@type": "sosa:FeatureOfInterest", "feature_id": "ambient_air_at_device", "feature_kind": "aire_ambiente", "description": "Aire ambiente en el punto de toma del sensor, a bordo de la plataforma"}
+{"@type": "sosa:Sensor", "sensor_id": "ppd42ns_01", "hosted_by": "moto_01", "sensor_model": "PPD42NS", "sensor_type": "particulate_matter", "calibration_params": {"voltage_divider_r1_ohm": 1000, "voltage_divider_r2_ohm": 2000}, "install_date": "2026-10-05", "status": "activo"}
+```
+
+El `@context` publicado (`docs/context/ki1.jsonld`) y el vocabulario `proy:` (`docs/vocab.ttl`,
+con `proy:featureKind`) se regeneran con `python3 -m tools.build_site docs`.
+
 ## Instalación en la Raspberry Pi
 ```bash
 cd ~ && git clone https://github.com/elian0609/sensado-vehicular.git
@@ -44,6 +105,9 @@ cd sensado-vehicular
 sudo apt install -y python3-gpiozero python3-lgpio python3-paho-mqtt \
                     mosquitto mosquitto-clients avahi-daemon
 pip3 install pyld --break-system-packages      # solo para validar
+# Versiones de referencia: requirements.txt (registrar las reales con `pip freeze`
+# en docs/ENTORNO_REFERENCIA.md). Alternativa en entorno virtual:
+#   python3 -m venv --system-site-packages .venv && .venv/bin/pip install -r requirements.txt
 
 # Broker de KI-1 (escucha en la WLAN, persistencia cada 10 s)
 sudo cp deploy/mosquitto/ki1.conf /etc/mosquitto/conf.d/ki1.conf
@@ -121,11 +185,56 @@ python3 -m tools.validate_jsonld recibido.jsonl --show
 ## Arranque automático (sesiones de horas en el vehículo)
 ```bash
 sudo cp deploy/systemd/edge-node.service /etc/systemd/system/
+# Adaptar el usuario y la ruta de la instalación (sin editar el archivo copiado):
+sudo systemctl edit edge-node        # [Service] User=<usuario>  WorkingDirectory=<ruta del repo>
+# Valores operativos opcionales (ver la sección siguiente):
+sudo cp deploy/edge-node.env.example /etc/edge-node.env
 sudo systemctl daemon-reload && sudo systemctl enable --now edge-node
 journalctl -u edge-node -f
 ```
 El servicio arranca después de Mosquitto. Si el broker no estuviera disponible,
 el nodo sigue adquiriendo y entrega lo acumulado al conectarse.
+
+## Configuración por entorno
+
+Los valores operativos se sobrescriben con variables `EDGE_*` (en el servicio,
+`EnvironmentFile=-/etc/edge-node.env`; plantilla en `deploy/edge-node.env.example`).
+Se validan al arrancar: un valor no válido detiene el nodo con un mensaje que nombra la variable.
+
+| Variable | Valor por defecto | Rango |
+|---|---|---|
+| `EDGE_MQTT_HOST` | `localhost` | nombre de host sin espacios |
+| `EDGE_MQTT_PORT` | `1883` | 1–65535 |
+| `EDGE_MQTT_CLIENT_ID` | `nodo_edge_moto_01` | 1–23 caracteres |
+| `EDGE_OUTBOX_PATH` | `outbox_ki1.jsonl` | ruta, distinta de la de errores |
+| `EDGE_ERRORS_PATH` | `outbox_ki1_errors.jsonl` | ruta |
+| `EDGE_WINDOW_SECONDS` | `30` | (0, 600] |
+| `EDGE_LOG_LEVEL` | `INFO` | `DEBUG`, `INFO`, `WARNING`, `ERROR` |
+| `EDGE_SHUTDOWN_DRAIN_SECONDS` | `10` | [0, 120] |
+
+Los IRIs del proyecto (`PROJECT_NS`, `VOCAB_NS`, `ID_BASE`) **no** son configurables: forman parte
+del contrato y cambiarlos cambiaría la identidad de todas las observaciones.
+
+## Robustez
+
+- Un fallo al anotar, serializar, calcular el tópico o emitir una observación **no** detiene el
+  nodo: se registra en el log y la observación cruda se guarda, con la etapa y el motivo, en
+  `outbox_ki1_errors.jsonl` (JSON Lines con fsync); el bucle sigue con la siguiente
+  (`core/pipeline.py`).
+- Al parar el servicio (SIGTERM) o con Ctrl+C, el nodo deja de adquirir, procesa lo que queda en
+  la cola durante `EDGE_SHUTDOWN_DRAIN_SECONDS` y cierra los sinks (MQTT espera la confirmación de
+  lo pendiente).
+
+## Pruebas y calidad (PC o Pi)
+
+```bash
+python3 -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+.venv/bin/pytest                    # contrato KI-1 v2, identidad, semántica, M1 simulado, sinks, robustez, config
+.venv/bin/ruff check . && .venv/bin/ruff format --check .
+```
+
+Las pruebas del PPD42NS usan `gpiozero.pins.mock.MockFactory` con reloj inyectado: no necesitan
+hardware ni esperan la ventana real.
 
 ## Parámetros críticos
 Todos en `config.py` (namespace, sensor, ventana de muestreo, broker, QoS,
