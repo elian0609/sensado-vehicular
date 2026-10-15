@@ -1,0 +1,17 @@
+# Configuración de herramientas (ruff y pytest). edge_node NO es un paquete
+# instalable: se ejecuta como `python3 main.py` desde la raíz del repositorio.
+
+[tool.ruff]
+target-version = "py39"    # mínimo conservador; la versión real de la Pi se registra en docs/ENTORNO_REFERENCIA.md
+line-length = 100
+extend-exclude = [".venv", "tests/fixtures"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["config", "core", "semantic", "sensors", "sinks", "tools"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]
