@@ -22,7 +22,8 @@ dependencias fijadas, ruff y 130 pruebas.
 | M1 | `sensors/ppd42ns.py` (inyección de reloj y `lpo_ratio`) |
 | Calidad | `pyproject.toml`, `requirements.txt`, `requirements-dev.txt`, `.gitignore`, formato de todo el repo |
 | Pruebas | `tests/conftest.py`, `tests/test_*.py`, `tests/fixtures/contracts/` (copiado de MCS_BACKEND con su manifiesto) |
-| Documentación | `README.md`, `CHANGELOG.md`, `docs/ENTORNO_REFERENCIA.md`, `docs/VERIFICACION_HARDWARE.md`, este archivo |
+| Documentación | `README.md`, `CHANGELOG.md`, `ops/ENTORNO_REFERENCIA.md`, `ops/VERIFICACION_HARDWARE.md`, este archivo (`ops/` no se publica; `docs/` es solo el sitio de GitHub Pages, BL-33) |
+| Versión de Python | `pyproject.toml` (`requires-python = ">=3.11"`, ruff `py311`), guarda en `config.py`, README (BL-32) |
 
 Orden de los commits: configuración → `style:` → **`test:` (pruebas, en rojo)** → `feat!:` contrato
 v2 → `refactor:` M1 → `feat:` configuración → `feat:` robustez → `feat(deploy):` → `docs:`.
@@ -31,10 +32,10 @@ v2 → `refactor:` M1 → `feat:` configuración → `feat:` robustez → `feat(
 
 ```
 $ .venv/bin/pytest
-130 passed in 1.6 s
+134 passed in 1.7 s
 $ .venv/bin/ruff check . && .venv/bin/ruff format --check .
 All checks passed!
-37 files already formatted
+40 files already formatted
 ```
 
 | Archivo | Casos | Qué comprueba |
@@ -48,6 +49,7 @@ All checks passed!
 | `test_pipeline_errors.py` | 7 | Fallo en anotación, serialización, tópico o envío → archivo de errores y el bucle sigue; vaciado al parar con tiempo máximo |
 | `test_clock.py` | 7 | Sin cambios de lógica (ahora con pytest) |
 | `test_fixtures_manifest.py` | 2 | Las fixtures copiadas coinciden con `MANIFEST.sha256` |
+| `test_docs_site.py` | 4 | `docs/` contiene solo la lista permitida del sitio; `build_site` genera exactamente esa lista; la documentación operativa está en `ops/` |
 
 Prueba manual con GPIO simulado (`EDGE_OUTBOX_PATH=... python3 main.py --simulate --sink file --window 1 --max 3`):
 7 documentos, `tools.validate_jsonld` → `válidos: 7`; SIGTERM → `Fin: 3 observaciones emitidas, 0 con
@@ -65,7 +67,7 @@ error` y salida 0; `EDGE_MQTT_PORT=abc` → `Configuración no válida: EDGE_MQT
 
 ## Verificación en hardware
 
-**PENDIENTE DE VERIFICACIÓN EN HARDWARE**: `docs/VERIFICACION_HARDWARE.md` (despliegue, dependencias,
+**PENDIENTE DE VERIFICACIÓN EN HARDWARE**: `ops/VERIFICACION_HARDWARE.md` (despliegue, dependencias,
 4 registros retenidos con `mosquitto_sub`, `@id` en la telemetría, `validate_jsonld` sobre el outbox
 nuevo, parada ordenada y app actual). Las versiones de `requirements.txt` no se han confirmado en una
-Pi 3B: registrar `pip freeze` en `docs/ENTORNO_REFERENCIA.md`.
+Pi 3B: registrar `pip freeze` en `ops/ENTORNO_REFERENCIA.md`.

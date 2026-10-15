@@ -23,7 +23,12 @@ del contrato KI-1 que emite el nodo (`MCS_BACKEND/contracts/`).
 - `requirements.txt` y `requirements-dev.txt` con versiones fijadas; `pyproject.toml` con ruff y pytest.
 - Pruebas pytest (130): contrato v2 con las fixtures sincronizadas de MCS_BACKEND, identidad,
   semántica RDF, M1 con GPIO simulado, sinks, robustez y configuración.
-- `docs/ENTORNO_REFERENCIA.md` y `docs/VERIFICACION_HARDWARE.md`.
+- `ops/ENTORNO_REFERENCIA.md` y `ops/VERIFICACION_HARDWARE.md`.
+- `ops/`: documentación operativa (verificación en hardware, entorno de referencia, PR), fuera
+  de `docs/`, que es el sitio publicado en GitHub Pages; `tests/test_docs_site.py` impide publicar
+  en `docs/` algo que no esté en la lista permitida (BL-33).
+- Requisito **Python ≥ 3.11** (Raspberry Pi OS Bookworm): `requires-python` en `pyproject.toml`,
+  comprobación al arrancar en `config.py` y ruff con `target-version = "py311"` (BL-32).
 
 ### Cambiado
 - `tools/validate_jsonld.py` comprueba PC1–PC6 de la tesis con el modelo v2 (`@id` presente, FOI IRI).

@@ -25,17 +25,17 @@ en la propia Pi.
 | # | Comando | Resultado esperado | Resultado |
 |---|---|---|---|
 | 1.1 | `git fetch origin && git checkout iter-01-ki1-v2 && git pull` | `Cambiado a la rama 'iter-01-ki1-v2'`; último commit igual al del PR | |
-| 1.2 | `git log --oneline -1` | Coincide con el último commit de `docs/PR_iter-01.md` | |
+| 1.2 | `git log --oneline -1` | Coincide con el último commit de `ops/PR_iter-01.md` | |
 
 ## 2. Dependencias
 
 | # | Comando | Resultado esperado | Resultado |
 |---|---|---|---|
-| 2.1 | `python3 --version` | Python ≥ 3.11 (Raspberry Pi OS Bookworm o posterior). Con 3.9/3.10 el nodo no interpreta las horas con `Z` del gateway: reportarlo | |
+| 2.1 | `python3 --version` | Python 3.11.x (Raspberry Pi OS Bookworm). Con una versión anterior el nodo no arranca (`edge_node requiere Python >= 3.11`) | |
 | 2.2 | `uname -m` | `armv7l` o `aarch64` (hay ruedas de `lgpio` para ambos) | |
 | 2.3 | `python3 -c "import gpiozero, lgpio, paho.mqtt, pyld; print('ok')"` | `ok` | |
-| 2.4 | `python3 -m pip freeze 2>/dev/null \| grep -iE "gpiozero\|lgpio\|paho\|pyld"` y `dpkg -l python3-gpiozero python3-lgpio python3-paho-mqtt \| tail -3` | Versiones registradas en `docs/ENTORNO_REFERENCIA.md`. Si difieren de `requirements.txt` (gpiozero 2.0.1, lgpio 0.2.2.0, paho-mqtt 2.1.0), anotarlo: **las versiones de `requirements.txt` no se han confirmado en una Pi 3B** | |
-| 2.5 | Completar `docs/ENTORNO_REFERENCIA.md` | Todos los campos rellenos | |
+| 2.4 | `python3 -m pip freeze 2>/dev/null \| grep -iE "gpiozero\|lgpio\|paho\|pyld"` y `dpkg -l python3-gpiozero python3-lgpio python3-paho-mqtt \| tail -3` | Versiones registradas en `ops/ENTORNO_REFERENCIA.md`. Si difieren de `requirements.txt` (gpiozero 2.0.1, lgpio 0.2.2.0, paho-mqtt 2.1.0), anotarlo: **las versiones de `requirements.txt` no se han confirmado en una Pi 3B** | |
+| 2.5 | Completar `ops/ENTORNO_REFERENCIA.md` | Todos los campos rellenos | |
 
 ## 3. Configuración y servicio
 

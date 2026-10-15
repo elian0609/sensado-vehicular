@@ -1,5 +1,5 @@
 # Dependencias de ejecución del nodo edge en la Raspberry Pi 3B (Raspberry Pi OS).
-# Versiones fijadas; verificar en la Pi con `pip freeze` (docs/VERIFICACION_HARDWARE.md, paso 2).
+# Versiones fijadas; verificar en la Pi con `pip freeze` (ops/VERIFICACION_HARDWARE.md, paso 2).
 # lgpio publica ruedas linux_armv7l (SO de 32 bits) y manylinux aarch64 (SO de 64 bits).
 gpiozero==2.0.1
 lgpio==0.2.2.0

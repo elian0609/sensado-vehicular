@@ -99,6 +99,10 @@ El `@context` publicado (`docs/context/ki1.jsonld`) y el vocabulario `proy:` (`d
 con `proy:featureKind`) se regeneran con `python3 -m tools.build_site docs`.
 
 ## Instalación en la Raspberry Pi
+
+**Requisito: Python ≥ 3.11** (Raspberry Pi OS **Bookworm** en una Raspberry Pi 3B). El nodo se niega a
+arrancar con una versión anterior (`config.py`), y `core/clock.py` necesita 3.11 para interpretar las
+horas con sufijo `Z` que publica el gateway. Comprobación: `python3 --version`.
 ```bash
 cd ~ && git clone https://github.com/elian0609/sensado-vehicular.git
 cd sensado-vehicular
@@ -106,7 +110,7 @@ sudo apt install -y python3-gpiozero python3-lgpio python3-paho-mqtt \
                     mosquitto mosquitto-clients avahi-daemon
 pip3 install pyld --break-system-packages      # solo para validar
 # Versiones de referencia: requirements.txt (registrar las reales con `pip freeze`
-# en docs/ENTORNO_REFERENCIA.md). Alternativa en entorno virtual:
+# en ops/ENTORNO_REFERENCIA.md). Alternativa en entorno virtual:
 #   python3 -m venv --system-site-packages .venv && .venv/bin/pip install -r requirements.txt
 
 # Broker de KI-1 (escucha en la WLAN, persistencia cada 10 s)
