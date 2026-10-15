@@ -16,8 +16,8 @@ import logging
 import queue
 import threading
 import time
-from datetime import datetime, timezone
-from typing import Callable, Optional
+from collections.abc import Callable
+from datetime import UTC, datetime
 
 from core.observation import Observation, observation_to_dict
 from semantic.annotator import annotate as _annotate
@@ -78,7 +78,7 @@ class Pipeline:
 
     def _record_error(self, obs: Observation, stage: str, exc: Exception) -> None:
         record = {
-            "logged_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
+            "logged_at": datetime.now(UTC).isoformat(timespec="seconds"),
             "stage": stage,
             "error": f"{type(exc).__name__}: {exc}",
             "observation": observation_to_dict(obs),
@@ -94,7 +94,7 @@ def run_loop(
     stop: threading.Event,
     pipeline: Pipeline,
     drain_timeout: float,
-    max_emitted: Optional[int] = None,
+    max_emitted: int | None = None,
 ) -> int:
     """Procesa la cola hasta que se pide parar; luego vacía lo pendiente.
 

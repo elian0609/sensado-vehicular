@@ -10,7 +10,7 @@ Etapas (Fase 3, algoritmo del motor semántico):
 """
 
 import json
-from typing import Any, Optional
+from typing import Any
 
 from core.observation import Observation
 from semantic.context import KI1_TELEMETRY_CONTEXT
@@ -21,7 +21,7 @@ def _iso_utc(dt) -> str:
     return dt.isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
-def annotate(obs: Observation, clock_source: Optional[str] = None) -> dict[str, Any]:
+def annotate(obs: Observation, clock_source: str | None = None) -> dict[str, Any]:
     """clock_source: de dónde venía la hora del nodo al medir ('ntp', 'gateway'
     o 'rtc', ver core/clock.py). Se guarda en raw, fuera de la expansión
     semántica, para poder evaluar la fiabilidad de cada result_time.

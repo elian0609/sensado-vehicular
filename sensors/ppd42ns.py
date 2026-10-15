@@ -14,8 +14,8 @@ raw.quality_flag:
 import logging
 import threading
 import time
-from datetime import datetime, timezone
-from typing import Callable
+from collections.abc import Callable
+from datetime import UTC, datetime
 
 from core.observation import Observation
 from sensors.base import SensorModule
@@ -36,7 +36,7 @@ def lpo_ratio(low_seconds: float, window_seconds: float) -> float:
 
 
 def _utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+    return datetime.now(UTC)
 
 
 class PPD42NSSensor(SensorModule):

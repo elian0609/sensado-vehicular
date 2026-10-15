@@ -5,11 +5,11 @@ python3 -m unittest tests.test_clock -v
 
 import json
 import unittest
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 from core.clock import ClockSync
 
-NODE_NOW = datetime(2026, 10, 6, 23, 0, 0, tzinfo=timezone.utc)
+NODE_NOW = datetime(2026, 10, 6, 23, 0, 0, tzinfo=UTC)
 
 
 def _msg(dt: datetime) -> bytes:
@@ -64,7 +64,7 @@ class ClockSyncTest(unittest.TestCase):
             self.clock.on_gateway_time(b'{"utc": "2026-10-06T23:00:00"}'), "invalida"
         )  # sin zona horaria
         self.assertEqual(
-            self.clock.on_gateway_time(_msg(datetime(2020, 1, 1, tzinfo=timezone.utc))), "invalida"
+            self.clock.on_gateway_time(_msg(datetime(2020, 1, 1, tzinfo=UTC))), "invalida"
         )
 
     def test_la_correccion_del_gateway_caduca(self):

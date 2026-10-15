@@ -13,7 +13,7 @@ necesita un ADR nuevo.
 """
 
 import re
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 # Segmento válido de una IRI relativa sin codificación (contrato v2, idSegment).
 _SEGMENTO = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_.-]*$")
@@ -34,7 +34,7 @@ def compact_utc(result_time: datetime) -> str:
     """
     if result_time.tzinfo is None or result_time.utcoffset() is None:
         raise ValueError("result_time debe incluir zona horaria")
-    return result_time.astimezone(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
+    return result_time.astimezone(UTC).strftime("%Y%m%dT%H%M%SZ")
 
 
 def observation_id(sensor_id: str, observed_property: str, result_time: datetime) -> str:

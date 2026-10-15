@@ -12,8 +12,17 @@ KI-1 v2 y cambiarlos cambiaría la identidad de todas las observaciones.
 """
 
 import os
+import sys
 from collections.abc import Mapping
 from typing import Any
+
+# Requisito de versión (pyproject.toml: requires-python). config se importa antes que
+# cualquier otro módulo del nodo en main.py, así que el fallo es claro y temprano.
+if sys.version_info < (3, 11):  # noqa: UP036 (guarda intencional para la Pi)
+    raise SystemExit(
+        f"edge_node requiere Python >= 3.11 (Raspberry Pi OS Bookworm); "
+        f"se está usando {sys.version.split()[0]}"
+    )
 
 # --- Espacios de nombres (DIV-3) --------------------------------------------
 # REEMPLAZAR antes de la versión final por el dominio definitivo del proyecto

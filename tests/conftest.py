@@ -6,7 +6,7 @@ editan a mano (test_fixtures_manifest.py lo comprueba).
 """
 
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
@@ -17,7 +17,7 @@ from referencing.jsonschema import DRAFT202012
 from core.observation import Observation
 
 CONTRACTS = Path(__file__).parent / "fixtures" / "contracts"
-RESULT_TIME = datetime(2026, 10, 8, 16, 17, 39, tzinfo=timezone.utc)
+RESULT_TIME = datetime(2026, 10, 8, 16, 17, 39, tzinfo=UTC)
 
 
 def load_json(path: Path):

@@ -18,8 +18,8 @@ import logging
 import subprocess
 import threading
 import time
-from datetime import datetime, timezone
-from typing import Callable, Optional
+from collections.abc import Callable
+from datetime import UTC, datetime
 
 import config
 
@@ -56,7 +56,7 @@ class ClockSync:
     def __init__(
         self,
         ntp_synced: Callable[[], bool] = ntp_synchronized,
-        now: Callable[[], datetime] = lambda: datetime.now(timezone.utc),
+        now: Callable[[], datetime] = lambda: datetime.now(UTC),
         set_clock: Callable[[datetime], None] = _set_system_clock,
         write_rtc: Callable[[datetime], None] = _write_rtc,
         monotonic: Callable[[], float] = time.monotonic,
@@ -64,7 +64,7 @@ class ClockSync:
         self._ntp_synced, self._now = ntp_synced, now
         self._set_clock, self._write_rtc = set_clock, write_rtc
         self._monotonic = monotonic
-        self._last_gateway_check: Optional[float] = None
+        self._last_gateway_check: float | None = None
         self._lock = threading.Lock()
 
     def source(self) -> str:

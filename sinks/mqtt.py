@@ -15,7 +15,7 @@ import logging
 import socket
 import threading
 import time
-from typing import Callable, Optional
+from collections.abc import Callable
 
 import paho.mqtt.client as mqtt
 
@@ -45,7 +45,7 @@ class MqttSink(Ki1Sink):
         self,
         host: str = None,
         port: int = None,
-        on_gateway_time: Optional[Callable[[bytes], object]] = None,
+        on_gateway_time: Callable[[bytes], object] | None = None,
     ):
         """on_gateway_time: recibe la hora que publica el gateway (core/clock.py)."""
         self.host = host or config.MQTT_BROKER_HOST

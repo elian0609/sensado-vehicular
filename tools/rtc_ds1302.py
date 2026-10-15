@@ -19,8 +19,7 @@ Uso (como root, desde los servicios de deploy/systemd/):
 import argparse
 import sys
 import time
-from datetime import datetime, timedelta, timezone
-from typing import Optional
+from datetime import UTC, datetime, timedelta
 
 import config
 from core.clock import ntp_synchronized
@@ -45,7 +44,7 @@ def _unbcd(value: int) -> int:
 
 def encode_clock(dt: datetime) -> list[int]:
     """Registros 0-6 del DS1302 para una hora UTC (24 h, CH = 0: reloj en marcha)."""
-    dt = dt.astimezone(timezone.utc)
+    dt = dt.astimezone(UTC)
     return [
         _bcd(dt.second),  # bit 7 = CH (clock halt) en 0
         _bcd(dt.minute),
@@ -57,7 +56,7 @@ def encode_clock(dt: datetime) -> list[int]:
     ]
 
 
-def decode_clock(regs: list[int]) -> Optional[datetime]:
+def decode_clock(regs: list[int]) -> datetime | None:
     """Hora UTC de los registros 0-6, o None si el reloj está detenido o no es válida."""
     if regs[0] & 0x80:  # CH: oscilador detenido (nunca puesto en hora)
         return None
@@ -71,7 +70,7 @@ def decode_clock(regs: list[int]) -> Optional[datetime]:
             _unbcd(regs[2] & 0x3F),
             _unbcd(regs[1] & 0x7F),
             _unbcd(regs[0] & 0x7F),
-            tzinfo=timezone.utc,
+            tzinfo=UTC,
         )
     except ValueError:  # fecha imposible (p. ej. todo ceros)
         return None
@@ -121,7 +120,7 @@ class DS1302:
             self._tick()
         return byte
 
-    def _transaction(self, command: int, data: Optional[list[int]] = None, read: int = 0):
+    def _transaction(self, command: int, data: list[int] | None = None, read: int = 0):
         self._lg.gpio_write(self._h, self.clk, 0)
         self._lg.gpio_write(self._h, self.rst, 1)
         time.sleep(4e-6)
@@ -138,7 +137,7 @@ class DS1302:
     def read_raw(self) -> list[int]:
         return self._transaction(_CLOCK_BURST_READ, read=8)[:7]
 
-    def read(self) -> Optional[datetime]:
+    def read(self) -> datetime | None:
         return decode_clock(self.read_raw())
 
     def write(self, dt: datetime):
@@ -149,13 +148,13 @@ class DS1302:
         """Escribe la hora actual del sistema alineada al segundo. El DS1302 solo
         guarda segundos enteros: escribir en cualquier instante perdería la
         fracción (hasta 1 s), así que se espera al inicio del siguiente segundo."""
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         time.sleep(1 - now.microsecond / 1e6)
         target = now.replace(microsecond=0) + timedelta(seconds=1)
         self.write(target)
         return target
 
-    def read_on_tick(self, timeout: float = 1.5) -> Optional[datetime]:
+    def read_on_tick(self, timeout: float = 1.5) -> datetime | None:
         """Lee la hora justo cuando el RTC cambia de segundo: en ese instante la
         fracción es ~0, así que la hora leída es exacta (no hasta 1 s atrasada)."""
         first = self.read()
@@ -195,7 +194,7 @@ def main() -> int:
             raw = rtc.read_raw()
             print("registros:", " ".join(f"{b:02x}" for b in raw))
             dt = rtc.read_on_tick() if decode_clock(raw) else None
-            system = datetime.now(timezone.utc)
+            system = datetime.now(UTC)
             print("RTC:", dt.isoformat() if dt else "sin hora válida")
             print("sistema:", system.isoformat(timespec="milliseconds"))
             if dt:

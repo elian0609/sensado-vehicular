@@ -5,7 +5,7 @@ El reloj y la pausa de la ventana se inyectan: los pulsos se simulan dentro de l
 no espera la ventana real.
 """
 
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import pytest
 from gpiozero import Device
@@ -14,7 +14,7 @@ from gpiozero.pins.mock import MockFactory
 from sensors.ppd42ns import PPD42NSSensor, lpo_ratio
 
 PIN = 4
-T0 = datetime(2026, 10, 8, 16, 17, 9, tzinfo=timezone.utc)
+T0 = datetime(2026, 10, 8, 16, 17, 9, tzinfo=UTC)
 
 
 class RelojFalso:
