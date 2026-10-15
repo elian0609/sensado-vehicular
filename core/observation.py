@@ -25,3 +25,17 @@ class Observation:
     def __post_init__(self):
         if self.result_time.tzinfo is None:
             raise ValueError("result_time debe incluir zona horaria (UTC)")
+
+
+def observation_to_dict(obs: Observation) -> dict[str, Any]:
+    """Observación cruda serializable (archivo de errores): mismos nombres de campo,
+    result_time en ISO 8601 con zona horaria."""
+    return {
+        "sensor_id": obs.sensor_id,
+        "observed_property": obs.observed_property,
+        "value": obs.value,
+        "unit": obs.unit,
+        "result_time": obs.result_time.isoformat(),
+        "feature_of_interest": obs.feature_of_interest,
+        "raw": obs.raw,
+    }
