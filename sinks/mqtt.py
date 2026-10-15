@@ -10,11 +10,12 @@ La conexión es asíncrona: si el broker aún no está disponible al arrancar, e
 nodo sigue adquiriendo y los mensajes QoS 1 quedan en la cola del cliente
 hasta que la conexión se establece.
 """
+
 import logging
 import socket
 import threading
 import time
-from typing import Callable, Optional
+from collections.abc import Callable
 
 import paho.mqtt.client as mqtt
 
@@ -32,15 +33,20 @@ def resolve(host: str, port: int) -> list:
 
 
 def _new_client(client_id: str) -> mqtt.Client:
-    if hasattr(mqtt, "CallbackAPIVersion"):                    # paho-mqtt >= 2.0
-        return mqtt.Client(mqtt.CallbackAPIVersion.VERSION2, client_id=client_id,
-                           protocol=mqtt.MQTTv311)
+    if hasattr(mqtt, "CallbackAPIVersion"):  # paho-mqtt >= 2.0
+        return mqtt.Client(
+            mqtt.CallbackAPIVersion.VERSION2, client_id=client_id, protocol=mqtt.MQTTv311
+        )
     return mqtt.Client(client_id=client_id, protocol=mqtt.MQTTv311)  # paho 1.x
 
 
 class MqttSink(Ki1Sink):
-    def __init__(self, host: str = None, port: int = None,
-                 on_gateway_time: Optional[Callable[[bytes], object]] = None):
+    def __init__(
+        self,
+        host: str = None,
+        port: int = None,
+        on_gateway_time: Callable[[bytes], object] | None = None,
+    ):
         """on_gateway_time: recibe la hora que publica el gateway (core/clock.py)."""
         self.host = host or config.MQTT_BROKER_HOST
         self.port = port or config.MQTT_BROKER_PORT
@@ -52,21 +58,23 @@ class MqttSink(Ki1Sink):
         self._client = _new_client(config.MQTT_CLIENT_ID)
         if config.MQTT_USERNAME:
             self._client.username_pw_set(config.MQTT_USERNAME, config.MQTT_PASSWORD)
-        self._client.max_queued_messages_set(0)                 # cola sin límite
+        self._client.max_queued_messages_set(0)  # cola sin límite
         self._client.reconnect_delay_set(min_delay=1, max_delay=30)
         self._client.on_connect = self._on_connect
         self._client.on_disconnect = self._on_disconnect
         self._client.on_message = self._on_message
 
         try:
-            log.info("Broker %s:%d resuelve a %s", self.host, self.port,
-                     ", ".join(resolve(self.host, self.port)))
+            log.info(
+                "Broker %s:%d resuelve a %s",
+                self.host,
+                self.port,
+                ", ".join(resolve(self.host, self.port)),
+            )
         except socket.gaierror as e:
-            log.warning("No se pudo resolver %s (%s); se reintentará al conectar",
-                        self.host, e)
+            log.warning("No se pudo resolver %s (%s); se reintentará al conectar", self.host, e)
 
-        self._client.connect_async(self.host, self.port,
-                                   keepalive=config.MQTT_KEEPALIVE)
+        self._client.connect_async(self.host, self.port, keepalive=config.MQTT_KEEPALIVE)
         self._client.loop_start()
 
     # paho 2.x entrega reason_code como objeto; paho 1.x como entero.

@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elian0609.github.io/sensado-vehicular/contracts/v2/ki1-hora.schema.json",
+  "title": "KI-1 v2.0.0 · Hora del gateway (app → nodo edge)",
+  "description": "MQTT QoS 0, sin retain, tópico vehiculo/gateway/hora. Sin cambios frente a v1 (edge_node/core/clock.py: on_gateway_time; mqtt_edge_receiver.dart).",
+  "x-contract-version": "2.0.0",
+  "type": "object",
+  "required": ["utc", "fuente"],
+  "additionalProperties": false,
+  "properties": {
+    "utc": {
+      "type": "string",
+      "pattern": "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(\\.\\d{1,6})?Z$"
+    },
+    "fuente": {"type": "string", "minLength": 1}
+  }
+}

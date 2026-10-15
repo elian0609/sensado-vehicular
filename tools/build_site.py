@@ -5,6 +5,7 @@ Genera el sitio estático que publica el vocabulario del proyecto (proy:) y el
 Uso:  python3 -m tools.build_site docs
 Luego publicar la carpeta docs/ con GitHub Pages.
 """
+
 import html
 import json
 import os
@@ -15,28 +16,86 @@ from semantic.context import KI1_TELEMETRY_CONTEXT
 
 SOSA = "http://www.w3.org/ns/sosa/"
 
-# (término, dominio, rango, etiqueta, comentario) — los 10 términos del DIV-3
+# (término, dominio, rango, etiqueta, comentario) — los 10 términos del DIV-3 y
+# featureKind (registro sosa:FeatureOfInterest, ADR-008)
 TERMS = [
-    ("unit", "sosa:Observation", "xsd:string", "unidad",
-     "Unidad de medida asociada al valor de una observación."),
-    ("defaultUnit", "sosa:ObservableProperty", "xsd:string", "unidad por defecto",
-     "Unidad de medida por defecto de una propiedad observada."),
-    ("sensorModel", "sosa:Sensor", "xsd:string", "modelo del sensor",
-     "Modelo físico del dispositivo sensor (p. ej. PPD42NS)."),
-    ("sensorType", "sosa:Sensor", "xsd:string", "tipo de sensor",
-     "Categoría de magnitud que mide el dispositivo (catálogo abierto)."),
-    ("calibrationParams", "sosa:Sensor", "rdf:JSON", "parámetros de calibración",
-     "Parámetros de calibración propios del sensor, como objeto JSON."),
-    ("installDate", "sosa:Sensor", "xsd:date", "fecha de instalación",
-     "Fecha de instalación física del sensor sobre la plataforma vehicular."),
-    ("status", "sosa:Sensor", "xsd:string", "estado",
-     "Estado operativo del dispositivo (activo / inactivo)."),
-    ("vehicleType", "sosa:Platform", "xsd:string", "tipo de vehículo",
-     "Tipo de vehículo sobre el que opera la plataforma."),
-    ("routeLabel", "sosa:Platform", "xsd:string", "etiqueta de ruta",
-     "Identificador de la ruta urbana recorrida por la plataforma."),
-    ("registrationDate", "sosa:Platform", "xsd:date", "fecha de registro",
-     "Fecha de alta de la plataforma dentro del sistema."),
+    (
+        "unit",
+        "sosa:Observation",
+        "xsd:string",
+        "unidad",
+        "Unidad de medida asociada al valor de una observación.",
+    ),
+    (
+        "defaultUnit",
+        "sosa:ObservableProperty",
+        "xsd:string",
+        "unidad por defecto",
+        "Unidad de medida por defecto de una propiedad observada.",
+    ),
+    (
+        "sensorModel",
+        "sosa:Sensor",
+        "xsd:string",
+        "modelo del sensor",
+        "Modelo físico del dispositivo sensor (p. ej. PPD42NS).",
+    ),
+    (
+        "sensorType",
+        "sosa:Sensor",
+        "xsd:string",
+        "tipo de sensor",
+        "Categoría de magnitud que mide el dispositivo (catálogo abierto).",
+    ),
+    (
+        "calibrationParams",
+        "sosa:Sensor",
+        "rdf:JSON",
+        "parámetros de calibración",
+        "Parámetros de calibración propios del sensor, como objeto JSON.",
+    ),
+    (
+        "installDate",
+        "sosa:Sensor",
+        "xsd:date",
+        "fecha de instalación",
+        "Fecha de instalación física del sensor sobre la plataforma vehicular.",
+    ),
+    (
+        "status",
+        "sosa:Sensor",
+        "xsd:string",
+        "estado",
+        "Estado operativo del dispositivo (activo / inactivo).",
+    ),
+    (
+        "vehicleType",
+        "sosa:Platform",
+        "xsd:string",
+        "tipo de vehículo",
+        "Tipo de vehículo sobre el que opera la plataforma.",
+    ),
+    (
+        "routeLabel",
+        "sosa:Platform",
+        "xsd:string",
+        "etiqueta de ruta",
+        "Identificador de la ruta urbana recorrida por la plataforma.",
+    ),
+    (
+        "registrationDate",
+        "sosa:Platform",
+        "xsd:date",
+        "fecha de registro",
+        "Fecha de alta de la plataforma dentro del sistema.",
+    ),
+    (
+        "featureKind",
+        "sosa:FeatureOfInterest",
+        "xsd:string",
+        "tipo de objeto de interés",
+        "Categoría del objeto de interés observado (p. ej. aire ambiente en el punto del sensor).",
+    ),
 ]
 
 
@@ -70,9 +129,10 @@ def turtle() -> str:
 
 def vocab_html() -> str:
     rows = "\n".join(
-        f'<tr id="{t}"><td><code>proy:{t}</code></td><td>{html.escape(l)}</td>'
+        f'<tr id="{t}"><td><code>proy:{t}</code></td><td>{html.escape(label)}</td>'
         f"<td><code>{d}</code></td><td><code>{r}</code></td><td>{html.escape(c)}</td></tr>"
-        for t, d, r, l, c in TERMS)
+        for t, d, r, label, c in TERMS
+    )
     return f"""<!doctype html><html lang="es"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Vocabulario proy:</title>
@@ -98,8 +158,9 @@ def main():
         "vocab.ttl": turtle(),
         "vocab.html": vocab_html(),
         "index.html": vocab_html(),
-        "context/ki1.jsonld": json.dumps({"@context": KI1_TELEMETRY_CONTEXT},
-                                         indent=2, ensure_ascii=False),
+        "context/ki1.jsonld": json.dumps(
+            {"@context": KI1_TELEMETRY_CONTEXT}, indent=2, ensure_ascii=False
+        ),
         ".nojekyll": "",
     }
     for name, content in files.items():

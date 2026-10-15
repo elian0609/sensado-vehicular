@@ -1,0 +1,27 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elian0609.github.io/sensado-vehicular/contracts/v2/ki2-headers.schema.json",
+  "title": "KI-2 v2.0.0 · Cabeceras HTTP de las peticiones a /v1/batch y /v1/batch/raw",
+  "description": "Se valida como objeto {nombre: valor}. X-Gateway-Id (ADR-003) es obligatoria para los productores v2; el backend la tolera ausente (clientes v1, gateway_id NULL). X-Run-Id y X-Scenario (ADR-004) van juntas y solo en el experimento. X-Api-Key solo si la autenticación está activada (ADR-013).",
+  "x-contract-version": "2.0.0",
+  "type": "object",
+  "required": ["Content-Type", "X-Gateway-Id"],
+  "properties": {
+    "Content-Type": {"enum": ["application/ld+json", "application/json"]},
+    "X-Gateway-Id": {
+      "description": "UUID v4 generado una vez por instalación de la app y persistido.",
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$"
+    },
+    "X-Run-Id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "X-Scenario": {"enum": ["BORDE", "BACKEND"]},
+    "X-Api-Key": {"type": "string", "minLength": 16}
+  },
+  "dependentRequired": {
+    "X-Run-Id": ["X-Scenario"],
+    "X-Scenario": ["X-Run-Id"]
+  }
+}

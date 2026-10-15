@@ -1,0 +1,29 @@
+# Configuración de herramientas (ruff y pytest). edge_node NO es un paquete
+# instalable: se ejecuta como `python3 main.py` desde la raíz del repositorio.
+
+# Solo metadatos: no hay [build-system] ni paquetes que instalar. requires-python
+# documenta el requisito (Raspberry Pi OS Bookworm trae Python 3.11) y main.py lo
+# comprueba al arrancar.
+[project]
+name = "edge-node"
+version = "2.0.0"
+requires-python = ">=3.11"
+
+[tool.ruff]
+target-version = "py311"   # Raspberry Pi OS Bookworm (Python 3.11)
+line-length = 100
+extend-exclude = [".venv", "tests/fixtures"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# HTML/CSS embebido en una cadena: partir la línea cambiaría el sitio generado.
+"tools/build_site.py" = ["E501"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["config", "core", "semantic", "sensors", "sinks", "tools"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["."]

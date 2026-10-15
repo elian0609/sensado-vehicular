@@ -1,0 +1,13 @@
+{
+  "@context": {
+    "@base": "https://elian0609.github.io/sensado-vehicular/id/",
+    "sosa": "http://www.w3.org/ns/sosa/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "proy": "https://elian0609.github.io/sensado-vehicular/vocab#",
+    "property_name": "@id",
+    "unit": "proy:defaultUnit"
+  },
+  "@type": "sosa:ObservableProperty",
+  "property_name": "estimated_pm_mass_concentration",
+  "unit": "ug_m3"
+}

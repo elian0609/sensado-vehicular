@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elian0609.github.io/sensado-vehicular/contracts/v2/ki1-registro-platform.schema.json",
+  "title": "KI-1 v2.0.0 · Registro sosa:Platform",
+  "description": "MQTT QoS 1 con retain, tópico vehiculo/plataforma/registro. Sin cambios frente a v1.",
+  "x-contract-version": "2.0.0",
+  "type": "object",
+  "required": ["@context", "@type", "vehicle_id", "vehicle_type", "registration_date"],
+  "additionalProperties": false,
+  "properties": {
+    "@context": {
+      "allOf": [{"$ref": "_comun.schema.json#/$defs/contextoBase"}],
+      "required": ["vehicle_id"],
+      "properties": {"vehicle_id": {"const": "@id"}}
+    },
+    "@type": {"const": "sosa:Platform"},
+    "vehicle_id": {"$ref": "_comun.schema.json#/$defs/idSegment"},
+    "vehicle_type": {"type": "string", "minLength": 1},
+    "route_label": {"type": "string", "minLength": 1},
+    "registration_date": {"$ref": "_comun.schema.json#/$defs/fecha"}
+  }
+}

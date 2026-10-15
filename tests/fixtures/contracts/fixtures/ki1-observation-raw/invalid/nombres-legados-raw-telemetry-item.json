@@ -1,0 +1,10 @@
+{
+  "obs_id": "obs_10023",
+  "device_id": "moto_01",
+  "sensor_id": "ppd42ns_01",
+  "property_id": "pm25",
+  "value": 38.5,
+  "result_time": "2026-10-10T08:30:00Z",
+  "lat": -2.8974,
+  "lon": -79.0045
+}

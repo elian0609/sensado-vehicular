@@ -12,13 +12,14 @@ La hora importa por dos motivos: result_time es parte de la clave de la
 Observación (DIV-2) y la app geolocaliza cada observación buscando su
 result_time en la trayectoria GPS del teléfono (1 s de desfase ≈ 8 m a 30 km/h).
 """
+
 import json
 import logging
 import subprocess
 import threading
 import time
-from datetime import datetime, timezone
-from typing import Callable, Optional
+from collections.abc import Callable
+from datetime import UTC, datetime
 
 import config
 
@@ -26,8 +27,9 @@ log = logging.getLogger("edge_node.clock")
 
 
 def ntp_synchronized() -> bool:
-    out = subprocess.run(["timedatectl", "show", "-p", "NTPSynchronized", "--value"],
-                         capture_output=True, text=True)
+    out = subprocess.run(
+        ["timedatectl", "show", "-p", "NTPSynchronized", "--value"], capture_output=True, text=True
+    )
     return out.stdout.strip() == "yes"
 
 
@@ -39,9 +41,9 @@ def _set_system_clock(dt: datetime) -> None:
 def _write_rtc(_dt: datetime) -> None:
     # Se llama justo después de poner el reloj del sistema en _dt: se escribe la
     # hora del sistema alineada al segundo (write_now) para no perder la fracción.
-    from tools.rtc_ds1302 import DS1302      # import tardío: GPIO solo al corregir
-    rtc = DS1302(config.RTC_DS1302_GPIO_CLK, config.RTC_DS1302_GPIO_DAT,
-                 config.RTC_DS1302_GPIO_RST)
+    from tools.rtc_ds1302 import DS1302  # import tardío: GPIO solo al corregir
+
+    rtc = DS1302(config.RTC_DS1302_GPIO_CLK, config.RTC_DS1302_GPIO_DAT, config.RTC_DS1302_GPIO_RST)
     try:
         rtc.write_now()
     finally:
@@ -51,16 +53,18 @@ def _write_rtc(_dt: datetime) -> None:
 class ClockSync:
     """Aplica la hora del gateway cuando no hay NTP y conoce la fuente actual."""
 
-    def __init__(self,
-                 ntp_synced: Callable[[], bool] = ntp_synchronized,
-                 now: Callable[[], datetime] = lambda: datetime.now(timezone.utc),
-                 set_clock: Callable[[datetime], None] = _set_system_clock,
-                 write_rtc: Callable[[datetime], None] = _write_rtc,
-                 monotonic: Callable[[], float] = time.monotonic):
+    def __init__(
+        self,
+        ntp_synced: Callable[[], bool] = ntp_synchronized,
+        now: Callable[[], datetime] = lambda: datetime.now(UTC),
+        set_clock: Callable[[datetime], None] = _set_system_clock,
+        write_rtc: Callable[[datetime], None] = _write_rtc,
+        monotonic: Callable[[], float] = time.monotonic,
+    ):
         self._ntp_synced, self._now = ntp_synced, now
         self._set_clock, self._write_rtc = set_clock, write_rtc
         self._monotonic = monotonic
-        self._last_gateway_check: Optional[float] = None
+        self._last_gateway_check: float | None = None
         self._lock = threading.Lock()
 
     def source(self) -> str:
@@ -86,7 +90,7 @@ class ClockSync:
             log.warning("Hora del gateway no plausible: %s", phone.isoformat())
             return "invalida"
         if self._ntp_synced():
-            return "ignorada_ntp"            # NTP es mejor referencia que el teléfono
+            return "ignorada_ntp"  # NTP es mejor referencia que el teléfono
 
         offset = (phone - self._now()).total_seconds()
         if abs(offset) < config.CLOCK_SYNC_MIN_OFFSET_S:
@@ -94,13 +98,19 @@ class ClockSync:
             return "en_hora"
         if offset < -config.CLOCK_SYNC_MAX_BACKWARD_S:
             # Retroceder mucho repetiría result_time ya emitidos (clave DIV-2)
-            log.warning("Hora del gateway %.1f s por detrás del nodo: no se retrocede "
-                        "más de %d s", -offset, config.CLOCK_SYNC_MAX_BACKWARD_S)
+            log.warning(
+                "Hora del gateway %.1f s por detrás del nodo: no se retrocede más de %d s",
+                -offset,
+                config.CLOCK_SYNC_MAX_BACKWARD_S,
+            )
             return "rechazada_atras"
 
         self._set_clock(phone)
-        log.info("Hora corregida con el gateway: %+.1f s (ahora %s)", offset,
-                 phone.isoformat(timespec="seconds"))
+        log.info(
+            "Hora corregida con el gateway: %+.1f s (ahora %s)",
+            offset,
+            phone.isoformat(timespec="seconds"),
+        )
         try:
             self._write_rtc(phone)
         except Exception:

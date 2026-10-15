@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elian0609.github.io/sensado-vehicular/contracts/v2/ki1-registro-sensor.schema.json",
+  "title": "KI-1 v2.0.0 · Registro sosa:Sensor",
+  "description": "MQTT QoS 1 con retain, tópico vehiculo/sensor/{sensor_id}/registro. Sin cambios frente a v1. hosted_by es la fuente de device_id en el backend (ADR-003).",
+  "x-contract-version": "2.0.0",
+  "type": "object",
+  "required": ["@context", "@type", "sensor_id", "hosted_by", "sensor_model", "sensor_type", "status"],
+  "additionalProperties": false,
+  "properties": {
+    "@context": {
+      "allOf": [{"$ref": "_comun.schema.json#/$defs/contextoBase"}],
+      "required": ["sensor_id", "hosted_by"],
+      "properties": {
+        "sensor_id": {"const": "@id"},
+        "hosted_by": {"const": {"@id": "sosa:isHostedBy", "@type": "@id"}}
+      }
+    },
+    "@type": {"const": "sosa:Sensor"},
+    "sensor_id": {"$ref": "_comun.schema.json#/$defs/idSegment"},
+    "hosted_by": {"$ref": "_comun.schema.json#/$defs/idSegment"},
+    "sensor_model": {"type": "string", "minLength": 1},
+    "sensor_type": {"type": "string", "minLength": 1},
+    "calibration_params": {"type": "object"},
+    "install_date": {"$ref": "_comun.schema.json#/$defs/fecha"},
+    "status": {"enum": ["activo", "inactivo"]}
+  }
+}

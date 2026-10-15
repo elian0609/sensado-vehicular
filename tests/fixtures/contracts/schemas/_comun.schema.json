@@ -1,0 +1,100 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elian0609.github.io/sensado-vehicular/contracts/v2/_comun.schema.json",
+  "title": "Definiciones comunes de los contratos v2 (biblioteca, sin fixtures propias)",
+  "$defs": {
+    "base": {
+      "description": "@base del proyecto (edge_node/config.py: ID_BASE).",
+      "const": "https://elian0609.github.io/sensado-vehicular/id/"
+    },
+    "idSegment": {
+      "description": "Identificador compacto resoluble contra @base sin codificación (ADR-002).",
+      "type": "string",
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9_.-]*$",
+      "maxLength": 100
+    },
+    "observationId": {
+      "description": "@id relativo de la observación: obs/{sensor_id}/{observed_property}/{YYYYMMDDTHHMMSSZ} (ADR-002).",
+      "type": "string",
+      "pattern": "^obs/[A-Za-z0-9][A-Za-z0-9_.-]*/[A-Za-z0-9][A-Za-z0-9_.-]*/\\d{8}T\\d{6}Z$"
+    },
+    "resultTime": {
+      "description": "Instante UTC con precisión de segundo y sufijo Z (edge_node/semantic/annotator.py: _iso_utc).",
+      "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])T([01]\\d|2[0-3]):[0-5]\\d:[0-5]\\dZ$"
+    },
+    "fecha": {
+      "type": "string",
+      "pattern": "^\\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\\d|3[01])$"
+    },
+    "raw": {
+      "description": "Bloque raw de M1 (fuera de la expansión semántica). Campos tipados si aparecen; el resto es libre por sensor.",
+      "type": "object",
+      "properties": {
+        "pulse_count": {"type": "integer", "minimum": 0},
+        "low_time_seconds": {"type": "number", "minimum": 0},
+        "window_seconds": {"type": "number", "exclusiveMinimum": 0},
+        "gpio_pin_bcm": {"type": "integer", "minimum": 0, "maximum": 27},
+        "quality_flag": {"enum": ["ok", "stuck_low"]},
+        "clock_source": {"enum": ["ntp", "gateway", "rtc"]}
+      }
+    },
+    "rawEstricto": {
+      "description": "raw tal como lo emite el edge v2: con quality_flag (ADR-006) y clock_source.",
+      "allOf": [{"$ref": "#/$defs/raw"}],
+      "required": ["quality_flag", "clock_source"]
+    },
+    "camposObservacion": {
+      "description": "Campos de la observación con los nombres de edge_node/core/observation.py (ADR-005).",
+      "type": "object",
+      "properties": {
+        "sensor_id": {"$ref": "#/$defs/idSegment"},
+        "observed_property": {"$ref": "#/$defs/idSegment"},
+        "value": {"type": "number"},
+        "unit": {"type": "string", "minLength": 1},
+        "result_time": {"$ref": "#/$defs/resultTime"},
+        "feature_of_interest": {"$ref": "#/$defs/idSegment"},
+        "raw": {"$ref": "#/$defs/raw"}
+      },
+      "required": ["sensor_id", "observed_property", "value", "unit", "result_time", "feature_of_interest", "raw"]
+    },
+    "camposGeo": {
+      "description": "Enriquecimiento espacial del gateway (M3) para el instante result_time.",
+      "type": "object",
+      "properties": {
+        "latitude": {"type": "number", "minimum": -90, "maximum": 90},
+        "longitude": {"type": "number", "minimum": -180, "maximum": 180},
+        "position_source": {
+          "enum": ["trayectoria_interpolada", "trayectoria_cercana", "actual", "no_disponible"]
+        }
+      },
+      "dependentRequired": {
+        "latitude": ["longitude", "position_source"],
+        "longitude": ["latitude", "position_source"]
+      }
+    },
+    "reglaLpo": {
+      "description": "ADR-012: la magnitud es LPO, una fracción en [0, 1] con unidad ratio_0_1.",
+      "if": {
+        "properties": {"observed_property": {"const": "low_pulse_occupancy_ratio"}},
+        "required": ["observed_property"]
+      },
+      "then": {
+        "properties": {
+          "value": {"minimum": 0, "maximum": 1},
+          "unit": {"const": "ratio_0_1"}
+        }
+      }
+    },
+    "contextoBase": {
+      "type": "object",
+      "required": ["@base", "sosa", "xsd", "proy"],
+      "properties": {
+        "@base": {"$ref": "#/$defs/base"},
+        "sosa": {"const": "http://www.w3.org/ns/sosa/"},
+        "xsd": {"const": "http://www.w3.org/2001/XMLSchema#"},
+        "proy": {"const": "https://elian0609.github.io/sensado-vehicular/vocab#"}
+      }
+    }
+  }
+}

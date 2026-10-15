@@ -1,0 +1,18 @@
+{
+  "@context": {
+    "@base": "https://elian0609.github.io/sensado-vehicular/id/",
+    "sosa": "http://www.w3.org/ns/sosa/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "proy": "https://elian0609.github.io/sensado-vehicular/vocab#",
+    "vehicle_id": "@id",
+    "vehicle_type": "proy:vehicleType",
+    "route_label": "proy:routeLabel",
+    "registration_date": {
+      "@id": "proy:registrationDate",
+      "@type": "xsd:date"
+    }
+  },
+  "@type": "sosa:Platform",
+  "vehicle_type": "motocicleta",
+  "registration_date": "2026-09-24"
+}

@@ -1,0 +1,20 @@
+{
+  "status": "ok",
+  "batch_size": 1,
+  "inserted": 1,
+  "duplicates": 0,
+  "upserted": 0,
+  "rejected": [],
+  "observation_ids": [
+    "https://elian0609.github.io/sensado-vehicular/id/obs/ppd42ns_01/low_pulse_occupancy_ratio/20261008T161739Z"
+  ],
+  "metrics": {
+    "run_id": "6f1c2a8e-3b7d-4c55-9a10-2e8f4d6b7c90",
+    "scenario": "A",
+    "bytes_in": 432,
+    "parse_ms": 1.0,
+    "annotate_ms": 0.5,
+    "db_ms": 2.0,
+    "total_ms": 3.5
+  }
+}

@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elian0609.github.io/sensado-vehicular/contracts/v2/ki1-registro-property.schema.json",
+  "title": "KI-1 v2.0.0 · Registro sosa:ObservableProperty",
+  "description": "MQTT QoS 1 con retain, tópico vehiculo/propiedad/{property_name}/registro. Sin cambios frente a v1. ADR-012: la propiedad del PPD42NS es low_pulse_occupancy_ratio.",
+  "x-contract-version": "2.0.0",
+  "type": "object",
+  "required": ["@context", "@type", "property_name", "unit"],
+  "additionalProperties": false,
+  "properties": {
+    "@context": {
+      "allOf": [{"$ref": "_comun.schema.json#/$defs/contextoBase"}],
+      "required": ["property_name", "unit"],
+      "properties": {
+        "property_name": {"const": "@id"},
+        "unit": {"const": "proy:defaultUnit"}
+      }
+    },
+    "@type": {"const": "sosa:ObservableProperty"},
+    "property_name": {"$ref": "_comun.schema.json#/$defs/idSegment"},
+    "unit": {"type": "string", "minLength": 1}
+  },
+  "allOf": [
+    {
+      "if": {"properties": {"property_name": {"const": "low_pulse_occupancy_ratio"}}},
+      "then": {"properties": {"unit": {"const": "ratio_0_1"}}}
+    }
+  ]
+}

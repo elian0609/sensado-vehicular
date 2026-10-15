@@ -1,0 +1,7 @@
+# Desarrollo y pruebas (PC o Pi). Incluye las de ejecución: las pruebas usan
+# gpiozero.pins.mock.MockFactory y el cliente paho-mqtt.
+-r requirements.txt
+pytest==9.1.1
+ruff==0.17.1
+jsonschema==4.26.0
+pyld==3.3.0
