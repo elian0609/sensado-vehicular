@@ -3,6 +3,13 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). La versión sigue la
 del contrato KI-1 que emite el nodo (`MCS_BACKEND/contracts/`).
 
+## [2.0.1] — Iteración 3 (rama `iter-03-vectores`)
+
+### Añadido
+- `tests/test_identity_vectors.py`: la regla de ADR-002 (`semantic/identity.py`) se prueba con los
+  vectores compartidos de `MCS_BACKEND/contracts/v2/vectors/identity.json`, los mismos que usa el
+  backend. Sin cambios en el código del nodo.
+
 ## [2.0.0] — Iteración 1 (rama `iter-01-ki1-v2`) — CAMBIO INCOMPATIBLE
 
 ### Cambiado (incompatible)
