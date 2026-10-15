@@ -1,0 +1,131 @@
+{
+  "description": "Vectores de prueba de la regla de identidad de ADR-002: @id = obs/{sensor_id}/{observed_property}/{result_time en UTC, YYYYMMDDTHHMMSSZ}. Los consumen el backend (services/identity.py) y el edge (semantic/identity.py); ambos deben producir exactamente estos @id o rechazar los casos con 'error'. result_time es una cadena ISO 8601: la regla normaliza el desfase a UTC y descarta las fracciones de segundo; sin zona horaria se rechaza. En el cable (contratos KI-1/KI-2) result_time siempre viaja en UTC con Z y sin fracciones: los casos con desfase o fracciones prueban la función, no un mensaje válido.",
+  "contract_version": "2.0.0",
+  "id_base": "https://elian0609.github.io/sensado-vehicular/id/",
+  "error_codes": {
+    "sin_zona_horaria": "result_time sin zona horaria",
+    "segmento_invalido": "sensor_id u observed_property no cumple ^[A-Za-z0-9][A-Za-z0-9_.-]*$"
+  },
+  "cases": [
+    {
+      "name": "ejemplo-real-anexo-a1",
+      "description": "Observación real del Anexo A.1 del análisis",
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "result_time": "2026-10-08T16:17:39Z",
+      "expected_id": "obs/ppd42ns_01/low_pulse_occupancy_ratio/20261008T161739Z",
+      "expected_iri": "https://elian0609.github.io/sensado-vehicular/id/obs/ppd42ns_01/low_pulse_occupancy_ratio/20261008T161739Z"
+    },
+    {
+      "name": "desfase-menos-0500",
+      "description": "Hora de Ecuador (UTC-5): mismo instante que el caso real",
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "result_time": "2026-10-08T11:17:39-05:00",
+      "expected_id": "obs/ppd42ns_01/low_pulse_occupancy_ratio/20261008T161739Z",
+      "expected_iri": "https://elian0609.github.io/sensado-vehicular/id/obs/ppd42ns_01/low_pulse_occupancy_ratio/20261008T161739Z"
+    },
+    {
+      "name": "desfase-cambia-de-dia-y-de-anio",
+      "description": "La conversión a UTC cruza el cambio de año",
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "result_time": "2026-12-31T22:30:00-05:00",
+      "expected_id": "obs/ppd42ns_01/low_pulse_occupancy_ratio/20270101T033000Z",
+      "expected_iri": "https://elian0609.github.io/sensado-vehicular/id/obs/ppd42ns_01/low_pulse_occupancy_ratio/20270101T033000Z"
+    },
+    {
+      "name": "desfase-cero-explicito",
+      "description": "+00:00 equivale a Z",
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "result_time": "2026-10-08T16:17:39+00:00",
+      "expected_id": "obs/ppd42ns_01/low_pulse_occupancy_ratio/20261008T161739Z",
+      "expected_iri": "https://elian0609.github.io/sensado-vehicular/id/obs/ppd42ns_01/low_pulse_occupancy_ratio/20261008T161739Z"
+    },
+    {
+      "name": "fracciones-de-segundo-se-descartan",
+      "description": "Se trunca, no se redondea (igual que el result_time emitido por el edge)",
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "result_time": "2026-10-08T16:17:39.999Z",
+      "expected_id": "obs/ppd42ns_01/low_pulse_occupancy_ratio/20261008T161739Z",
+      "expected_iri": "https://elian0609.github.io/sensado-vehicular/id/obs/ppd42ns_01/low_pulse_occupancy_ratio/20261008T161739Z"
+    },
+    {
+      "name": "sensor-id-caracteres-limite",
+      "description": "Todos los caracteres admitidos: letras, dígitos, punto, guion y guion bajo",
+      "sensor_id": "A9.b-c_Z",
+      "observed_property": "p.v-1_2",
+      "result_time": "2026-01-02T03:04:05Z",
+      "expected_id": "obs/A9.b-c_Z/p.v-1_2/20260102T030405Z",
+      "expected_iri": "https://elian0609.github.io/sensado-vehicular/id/obs/A9.b-c_Z/p.v-1_2/20260102T030405Z"
+    },
+    {
+      "name": "sensor-id-un-caracter",
+      "description": "Segmentos mínimos",
+      "sensor_id": "s",
+      "observed_property": "p",
+      "result_time": "2026-01-02T03:04:05Z",
+      "expected_id": "obs/s/p/20260102T030405Z",
+      "expected_iri": "https://elian0609.github.io/sensado-vehicular/id/obs/s/p/20260102T030405Z"
+    },
+    {
+      "name": "otra-propiedad",
+      "description": "Extensibilidad (ADR-012)",
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "estimated_pm_mass_concentration",
+      "result_time": "2026-10-08T16:17:39Z",
+      "expected_id": "obs/ppd42ns_01/estimated_pm_mass_concentration/20261008T161739Z",
+      "expected_iri": "https://elian0609.github.io/sensado-vehicular/id/obs/ppd42ns_01/estimated_pm_mass_concentration/20261008T161739Z"
+    },
+    {
+      "name": "sin-zona-horaria",
+      "description": "Hora local sin desfase: ambigua, se rechaza",
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "result_time": "2026-10-08T16:17:39",
+      "error": "sin_zona_horaria"
+    },
+    {
+      "name": "sensor-id-empieza-por-guion",
+      "description": "El primer carácter debe ser letra o dígito",
+      "sensor_id": "-ppd42ns",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "result_time": "2026-10-08T16:17:39Z",
+      "error": "segmento_invalido"
+    },
+    {
+      "name": "sensor-id-con-barra",
+      "description": "La barra rompería la IRI relativa",
+      "sensor_id": "ppd/42",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "result_time": "2026-10-08T16:17:39Z",
+      "error": "segmento_invalido"
+    },
+    {
+      "name": "sensor-id-con-espacio",
+      "description": "Espacios no admitidos",
+      "sensor_id": "ppd 42",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "result_time": "2026-10-08T16:17:39Z",
+      "error": "segmento_invalido"
+    },
+    {
+      "name": "sensor-id-vacio",
+      "description": "Segmento vacío",
+      "sensor_id": "",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "result_time": "2026-10-08T16:17:39Z",
+      "error": "segmento_invalido"
+    },
+    {
+      "name": "propiedad-con-almohadilla",
+      "description": "# introduciría un fragmento en la IRI",
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "lpo#1",
+      "result_time": "2026-10-08T16:17:39Z",
+      "error": "segmento_invalido"
+    }
+  ]
+}
