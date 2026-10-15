@@ -8,8 +8,9 @@ Etapas (Fase 3, algoritmo del motor semántico):
      compactos.
   4. Serialización JSON-LD 1.1 con @context, lista para KI-1.
 """
+
 import json
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from core.observation import Observation
 from semantic.context import KI1_TELEMETRY_CONTEXT
@@ -19,7 +20,7 @@ def _iso_utc(dt) -> str:
     return dt.isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
-def annotate(obs: Observation, clock_source: Optional[str] = None) -> Dict[str, Any]:
+def annotate(obs: Observation, clock_source: Optional[str] = None) -> dict[str, Any]:
     """clock_source: de dónde venía la hora del nodo al medir ('ntp', 'gateway'
     o 'rtc', ver core/clock.py). Se guarda en raw, fuera de la expansión
     semántica, para poder evaluar la fiabilidad de cada result_time."""
@@ -37,6 +38,6 @@ def annotate(obs: Observation, clock_source: Optional[str] = None) -> Dict[str, 
     }
 
 
-def serialize(doc: Dict[str, Any]) -> str:
+def serialize(doc: dict[str, Any]) -> str:
     """Serialización compacta (sin espacios): es la que se mide como payload."""
     return json.dumps(doc, ensure_ascii=False, separators=(",", ":"))

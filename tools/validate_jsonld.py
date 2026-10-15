@@ -11,6 +11,7 @@ Para cada documento de la bandeja de salida:
 
 Uso:  python3 -m tools.validate_jsonld outbox_ki1.jsonl [--show]
 """
+
 import json
 import statistics
 import sys
@@ -48,7 +49,7 @@ def main():
     path, show = sys.argv[1], "--show" in sys.argv
     sizes, failed, shown, total = {}, 0, set(), 0
     with open(path, encoding="utf-8") as f:
-        for i, line in enumerate(l for l in f if l.strip()):
+        for i, line in enumerate(ln for ln in f if ln.strip()):
             kind, size, nquads, errors = check(line.strip())
             sizes.setdefault(kind, []).append(size)
             total += 1
@@ -60,8 +61,10 @@ def main():
                 print(f"--- Triples RDF ({kind}, doc {i}):\n" + nquads)
     print(f"Documentos: {total} | válidos: {total - failed}")
     for kind, s in sizes.items():
-        print(f"  {kind}: {len(s)} doc(s), payload (bytes) min/media/max: "
-              f"{min(s)}/{statistics.mean(s):.1f}/{max(s)}")
+        print(
+            f"  {kind}: {len(s)} doc(s), payload (bytes) min/media/max: "
+            f"{min(s)}/{statistics.mean(s):.1f}/{max(s)}"
+        )
     sys.exit(1 if failed else 0)
 
 

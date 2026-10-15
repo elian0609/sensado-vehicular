@@ -10,7 +10,8 @@ Jerarquía de tópicos MQTT de KI-1 (Fase 4).
 Los metadatos de registro se publican con retain para que un gateway que se
 suscriba después del arranque del nodo edge los reciba igualmente.
 """
-from typing import Any, Dict, Tuple
+
+from typing import Any
 
 import config
 
@@ -28,7 +29,7 @@ def gateway_time_topic() -> str:
     return f"{config.MQTT_TOPIC_ROOT}/gateway/hora"
 
 
-def topic_for(doc: Dict[str, Any]) -> Tuple[str, bool]:
+def topic_for(doc: dict[str, Any]) -> tuple[str, bool]:
     """Devuelve (tópico, retain) para un documento JSON-LD del DIV-3."""
     root, kind = config.MQTT_TOPIC_ROOT, doc.get("@type")
     if kind == "sosa:Observation":

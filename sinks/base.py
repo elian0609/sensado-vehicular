@@ -8,6 +8,7 @@ transporte, sin que M1 ni M2 cambien:
   - JsonlFileSink: bandeja de salida en archivo, para pruebas sin broker.
   - FanOutSink: entrega cada documento a varios sinks (MQTT + archivo).
 """
+
 import logging
 import os
 from abc import ABC, abstractmethod
@@ -19,7 +20,7 @@ class Ki1Sink(ABC):
     @abstractmethod
     def emit(self, payload: str, topic: str, retain: bool = False) -> None: ...
 
-    def close(self) -> None: ...
+    def close(self) -> None: ...  # noqa: B027 (gancho opcional, no abstracto)
 
 
 class JsonlFileSink(Ki1Sink):

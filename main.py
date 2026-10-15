@@ -12,6 +12,7 @@ Uso:
   python3 main.py --sink file            # sin broker: solo outbox_ki1.jsonl
   python3 main.py --simulate             # sin hardware: GPIO simulado
 """
+
 import argparse
 import logging
 import queue
@@ -35,6 +36,7 @@ def enable_simulation(pin: int) -> None:
     """GPIO simulado: genera pulsos bajos aleatorios en el pin del PPD42NS."""
     from gpiozero import Device
     from gpiozero.pins.mock import MockFactory
+
     Device.pin_factory = MockFactory()
     mock_pin = Device.pin_factory.pin(pin)
 
@@ -50,10 +52,14 @@ def enable_simulation(pin: int) -> None:
 
 def build_sensors():
     from sensors.ppd42ns import PPD42NSSensor
+
     return [
-        PPD42NSSensor(config.PPD42NS_SENSOR_ID, config.PPD42NS_GPIO_BCM,
-                      config.PPD42NS_WINDOW_SECONDS,
-                      config.DEFAULT_FEATURE_OF_INTEREST),
+        PPD42NSSensor(
+            config.PPD42NS_SENSOR_ID,
+            config.PPD42NS_GPIO_BCM,
+            config.PPD42NS_WINDOW_SECONDS,
+            config.DEFAULT_FEATURE_OF_INTEREST,
+        ),
         # Nuevo sensor = una línea aquí (p. ej. DHT11Sensor(...)).
     ]
 
@@ -74,14 +80,18 @@ def main():
     ap.add_argument("--simulate", action="store_true")
     ap.add_argument("--window", type=float, help="sobrescribe la ventana (solo pruebas)")
     ap.add_argument("--max", type=int, help="detener tras N observaciones (solo pruebas)")
-    ap.add_argument("--sink", choices=["mqtt", "file"], default="mqtt",
-                    help="transporte de KI-1 (por defecto: mqtt, con copia en "
-                         "outbox_ki1.jsonl)")
+    ap.add_argument(
+        "--sink",
+        choices=["mqtt", "file"],
+        default="mqtt",
+        help="transporte de KI-1 (por defecto: mqtt, con copia en outbox_ki1.jsonl)",
+    )
     ap.add_argument("--broker", help="nombre de dominio del broker (sobrescribe config)")
     args = ap.parse_args()
 
-    logging.basicConfig(level=logging.INFO, stream=sys.stderr,
-                        format="%(asctime)s %(levelname)s %(message)s")
+    logging.basicConfig(
+        level=logging.INFO, stream=sys.stderr, format="%(asctime)s %(levelname)s %(message)s"
+    )
     if args.window:
         config.PPD42NS_WINDOW_SECONDS = args.window
     if args.simulate:
@@ -92,10 +102,10 @@ def main():
     outbox = JsonlFileSink(config.OUTBOX_PATH)
     if args.sink == "mqtt":
         from sinks.mqtt import MqttSink
+
         # La bandeja se escribe en paralelo: respaldo y referencia de lo publicado.
         # Sin internet, la hora del gateway corrige el reloj del nodo.
-        sink = FanOutSink(outbox, MqttSink(host=args.broker,
-                                           on_gateway_time=clock.on_gateway_time))
+        sink = FanOutSink(outbox, MqttSink(host=args.broker, on_gateway_time=clock.on_gateway_time))
     else:
         sink = outbox
     q, stop = queue.Queue(), threading.Event()
@@ -118,13 +128,19 @@ def main():
                 obs = q.get(timeout=1)
             except queue.Empty:
                 continue
-            doc = annotate(obs, clock_source=clock.source())   # M2
+            doc = annotate(obs, clock_source=clock.source())  # M2
             payload = serialize(doc)
             topic, retain = topic_for(doc)
-            sink.emit(payload, topic, retain)           # KI-1
+            sink.emit(payload, topic, retain)  # KI-1
             emitted += 1
-            log.info("KI-1 <- %s %s=%s (%d bytes) -> %s", obs.sensor_id,
-                     obs.observed_property, obs.value, len(payload.encode()), topic)
+            log.info(
+                "KI-1 <- %s %s=%s (%d bytes) -> %s",
+                obs.sensor_id,
+                obs.observed_property,
+                obs.value,
+                len(payload.encode()),
+                topic,
+            )
             if args.max and emitted >= args.max:
                 break
     except KeyboardInterrupt:

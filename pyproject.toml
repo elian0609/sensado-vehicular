@@ -9,6 +9,10 @@ extend-exclude = [".venv", "tests/fixtures"]
 [tool.ruff.lint]
 select = ["E", "F", "W", "I", "B", "UP"]
 
+[tool.ruff.lint.per-file-ignores]
+# HTML/CSS embebido en una cadena: partir la línea cambiaría el sitio generado.
+"tools/build_site.py" = ["E501"]
+
 [tool.ruff.lint.isort]
 known-first-party = ["config", "core", "semantic", "sensors", "sinks", "tools"]
 

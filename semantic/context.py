@@ -7,6 +7,7 @@ Corrige respecto al borrador del DIV-3:
     relativas que se descartan al convertir a RDF;
   - tipa result_time como xsd:dateTimeStamp (rango exigido por sosa:resultTime).
 """
+
 import config
 
 SOSA = "http://www.w3.org/ns/sosa/"

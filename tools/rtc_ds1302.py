@@ -13,13 +13,14 @@ Uso (como root, desde los servicios de deploy/systemd/):
   python3 -m tools.rtc_ds1302 leer      # muestra la hora del RTC
   python3 -m tools.rtc_ds1302 guardar   # RTC <- hora del sistema (solo si NTP está sincronizado)
   python3 -m tools.rtc_ds1302 ajustar   # sistema <- RTC (solo si NTP NO está sincronizado)
-  python3 -m tools.rtc_ds1302 guardar --forzar   # escribe aunque no haya NTP (puesta en hora manual)
+  python3 -m tools.rtc_ds1302 guardar --forzar   # escribe aunque no haya NTP (hora manual)
 """
+
 import argparse
 import sys
 import time
 from datetime import datetime, timedelta, timezone
-from typing import List, Optional
+from typing import Optional
 
 import config
 from core.clock import ntp_synchronized
@@ -27,8 +28,8 @@ from core.clock import ntp_synchronized
 # Comandos de ráfaga (burst) del DS1302: 7 registros de reloj + control.
 _CLOCK_BURST_READ = 0xBF
 _CLOCK_BURST_WRITE = 0xBE
-_CONTROL_WRITE = 0x8E           # bit 7 = WP (protección contra escritura)
-_HALF_PERIOD_S = 2e-6           # muy por encima del mínimo del DS1302 a 3,3 V
+_CONTROL_WRITE = 0x8E  # bit 7 = WP (protección contra escritura)
+_HALF_PERIOD_S = 2e-6  # muy por encima del mínimo del DS1302 a 3,3 V
 
 # Fechas anteriores no pueden ser una hora válida para este proyecto.
 MIN_VALID_YEAR = 2026
@@ -42,38 +43,45 @@ def _unbcd(value: int) -> int:
     return (value >> 4) * 10 + (value & 0x0F)
 
 
-def encode_clock(dt: datetime) -> List[int]:
+def encode_clock(dt: datetime) -> list[int]:
     """Registros 0-6 del DS1302 para una hora UTC (24 h, CH = 0: reloj en marcha)."""
     dt = dt.astimezone(timezone.utc)
     return [
-        _bcd(dt.second),                # bit 7 = CH (clock halt) en 0
+        _bcd(dt.second),  # bit 7 = CH (clock halt) en 0
         _bcd(dt.minute),
-        _bcd(dt.hour),                  # bit 7 = 0: modo 24 h
+        _bcd(dt.hour),  # bit 7 = 0: modo 24 h
         _bcd(dt.day),
         _bcd(dt.month),
-        _bcd(dt.isoweekday()),          # 1-7
+        _bcd(dt.isoweekday()),  # 1-7
         _bcd(dt.year - 2000),
     ]
 
 
-def decode_clock(regs: List[int]) -> Optional[datetime]:
+def decode_clock(regs: list[int]) -> Optional[datetime]:
     """Hora UTC de los registros 0-6, o None si el reloj está detenido o no es válida."""
-    if regs[0] & 0x80:                  # CH: oscilador detenido (nunca puesto en hora)
+    if regs[0] & 0x80:  # CH: oscilador detenido (nunca puesto en hora)
         return None
-    if regs[2] & 0x80:                  # modo 12 h: este módulo siempre escribe 24 h
+    if regs[2] & 0x80:  # modo 12 h: este módulo siempre escribe 24 h
         return None
     try:
-        dt = datetime(2000 + _unbcd(regs[6]), _unbcd(regs[4] & 0x1F), _unbcd(regs[3] & 0x3F),
-                      _unbcd(regs[2] & 0x3F), _unbcd(regs[1] & 0x7F), _unbcd(regs[0] & 0x7F),
-                      tzinfo=timezone.utc)
-    except ValueError:                  # fecha imposible (p. ej. todo ceros)
+        dt = datetime(
+            2000 + _unbcd(regs[6]),
+            _unbcd(regs[4] & 0x1F),
+            _unbcd(regs[3] & 0x3F),
+            _unbcd(regs[2] & 0x3F),
+            _unbcd(regs[1] & 0x7F),
+            _unbcd(regs[0] & 0x7F),
+            tzinfo=timezone.utc,
+        )
+    except ValueError:  # fecha imposible (p. ej. todo ceros)
         return None
     return dt if dt.year >= MIN_VALID_YEAR else None
 
 
 class DS1302:
     def __init__(self, clk: int, dat: int, rst: int):
-        import lgpio                    # import tardío: permite probar sin hardware
+        import lgpio  # import tardío: permite probar sin hardware
+
         self._lg = lgpio
         self._h = self._open_chip()
         self.clk, self.dat, self.rst = clk, dat, rst
@@ -101,19 +109,19 @@ class DS1302:
 
     def _write_byte(self, byte: int):
         self._lg.gpio_claim_output(self._h, self.dat, 0)
-        for i in range(8):              # LSB primero; el DS1302 lee en el flanco de subida
+        for i in range(8):  # LSB primero; el DS1302 lee en el flanco de subida
             self._lg.gpio_write(self._h, self.dat, (byte >> i) & 1)
             self._tick()
 
     def _read_byte(self) -> int:
         self._lg.gpio_claim_input(self._h, self.dat)
         byte = 0
-        for i in range(8):              # el DS1302 pone cada bit tras el flanco de bajada
+        for i in range(8):  # el DS1302 pone cada bit tras el flanco de bajada
             byte |= self._lg.gpio_read(self._h, self.dat) << i
             self._tick()
         return byte
 
-    def _transaction(self, command: int, data: Optional[List[int]] = None, read: int = 0):
+    def _transaction(self, command: int, data: Optional[list[int]] = None, read: int = 0):
         self._lg.gpio_write(self._h, self.clk, 0)
         self._lg.gpio_write(self._h, self.rst, 1)
         time.sleep(4e-6)
@@ -127,14 +135,14 @@ class DS1302:
             self._lg.gpio_claim_input(self._h, self.dat)
             time.sleep(4e-6)
 
-    def read_raw(self) -> List[int]:
+    def read_raw(self) -> list[int]:
         return self._transaction(_CLOCK_BURST_READ, read=8)[:7]
 
     def read(self) -> Optional[datetime]:
         return decode_clock(self.read_raw())
 
     def write(self, dt: datetime):
-        self._transaction(_CONTROL_WRITE, [0x00])                       # quita WP
+        self._transaction(_CONTROL_WRITE, [0x00])  # quita WP
         self._transaction(_CLOCK_BURST_WRITE, encode_clock(dt) + [0x80])  # hora + WP
 
     def write_now(self) -> datetime:
@@ -174,12 +182,14 @@ def set_system_clock(dt: datetime):
 def main() -> int:
     ap = argparse.ArgumentParser(description="RTC DS1302 del nodo edge")
     ap.add_argument("accion", choices=["leer", "guardar", "ajustar"])
-    ap.add_argument("--forzar", action="store_true",
-                    help="con 'guardar': escribe aunque NTP no esté sincronizado")
+    ap.add_argument(
+        "--forzar",
+        action="store_true",
+        help="con 'guardar': escribe aunque NTP no esté sincronizado",
+    )
     args = ap.parse_args()
 
-    rtc = DS1302(config.RTC_DS1302_GPIO_CLK, config.RTC_DS1302_GPIO_DAT,
-                 config.RTC_DS1302_GPIO_RST)
+    rtc = DS1302(config.RTC_DS1302_GPIO_CLK, config.RTC_DS1302_GPIO_DAT, config.RTC_DS1302_GPIO_RST)
     try:
         if args.accion == "leer":
             raw = rtc.read_raw()
@@ -210,8 +220,11 @@ def main() -> int:
             return 0
         dt = rtc.read_on_tick()
         if dt is None:
-            print("ERROR: el RTC no tiene una hora válida; la hora del sistema "
-                  "no es fiable hasta sincronizar por NTP", file=sys.stderr)
+            print(
+                "ERROR: el RTC no tiene una hora válida; la hora del sistema "
+                "no es fiable hasta sincronizar por NTP",
+                file=sys.stderr,
+            )
             return 1
         set_system_clock(dt)
         print("sistema <- RTC:", dt.isoformat())

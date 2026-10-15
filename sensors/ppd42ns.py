@@ -10,11 +10,11 @@ raw.quality_flag:
   "stuck_low" la señal estuvo en bajo toda la ventana sin ningún pulso: el
               pin no tiene sensor (desconectado o cable suelto). LPO no válido.
 """
+
 import logging
 import threading
 import time
 from datetime import datetime, timezone
-from typing import List
 
 from core.observation import Observation
 from sensors.base import SensorModule
@@ -29,9 +29,10 @@ class PPD42NSSensor(SensorModule):
     # atascada. Con partículas reales el LPO observado no supera ~0.8.
     STUCK_LOW_MIN_RATIO = 0.99
 
-    def __init__(self, sensor_id: str, gpio_bcm: int, window_seconds: float,
-                 feature_of_interest: str):
-        from gpiozero import DigitalInputDevice   # import tardío: permite simular
+    def __init__(
+        self, sensor_id: str, gpio_bcm: int, window_seconds: float, feature_of_interest: str
+    ):
+        from gpiozero import DigitalInputDevice  # import tardío: permite simular
 
         self.sensor_id = sensor_id
         self.gpio_bcm = gpio_bcm
@@ -59,7 +60,7 @@ class PPD42NSSensor(SensorModule):
                 self._low_since = None
                 self._pulses += 1
 
-    def read(self) -> List[Observation]:
+    def read(self) -> list[Observation]:
         with self._lock:
             self._low_total, self._pulses = 0.0, 0
             self._low_since = time.monotonic() if self._pin.is_active else None
@@ -70,7 +71,7 @@ class PPD42NSSensor(SensorModule):
         with self._lock:
             now = time.monotonic()
             low = self._low_total
-            if self._low_since is not None:          # pulso aún abierto al cierre
+            if self._low_since is not None:  # pulso aún abierto al cierre
                 low += now - self._low_since
                 self._low_since = now
             window = now - start
@@ -82,23 +83,28 @@ class PPD42NSSensor(SensorModule):
         # publica igual, por trazabilidad, pero marcada para descartarla.
         stuck_low = pulses == 0 and lpo >= self.STUCK_LOW_MIN_RATIO
         if stuck_low:
-            log.warning("%s: señal en bajo toda la ventana (LPO=%.3f, 0 pulsos); "
-                        "¿sensor desconectado?", self.sensor_id, lpo)
-        return [Observation(
-            sensor_id=self.sensor_id,
-            observed_property=self.OBSERVED_PROPERTY,
-            value=round(lpo, 6),
-            unit=self.UNIT,
-            result_time=datetime.now(timezone.utc),
-            feature_of_interest=self.feature_of_interest,
-            raw={
-                "pulse_count": pulses,
-                "low_time_seconds": round(low, 4),
-                "window_seconds": round(window, 3),
-                "gpio_pin_bcm": self.gpio_bcm,
-                "quality_flag": "stuck_low" if stuck_low else "ok",
-            },
-        )]
+            log.warning(
+                "%s: señal en bajo toda la ventana (LPO=%.3f, 0 pulsos); ¿sensor desconectado?",
+                self.sensor_id,
+                lpo,
+            )
+        return [
+            Observation(
+                sensor_id=self.sensor_id,
+                observed_property=self.OBSERVED_PROPERTY,
+                value=round(lpo, 6),
+                unit=self.UNIT,
+                result_time=datetime.now(timezone.utc),
+                feature_of_interest=self.feature_of_interest,
+                raw={
+                    "pulse_count": pulses,
+                    "low_time_seconds": round(low, 4),
+                    "window_seconds": round(window, 3),
+                    "gpio_pin_bcm": self.gpio_bcm,
+                    "quality_flag": "stuck_low" if stuck_low else "ok",
+                },
+            )
+        ]
 
     def close(self) -> None:
         self._pin.close()
