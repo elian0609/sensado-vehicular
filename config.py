@@ -3,7 +3,17 @@ Parámetros críticos del Nodo Edge (H2).
 
 Todo valor que la metodología declara como "parámetro crítico" vive aquí,
 en un solo lugar, para que el experimento sea reproducible sin leer el código.
+
+Los valores OPERATIVOS se pueden sobrescribir con variables de entorno EDGE_*
+(ver load_settings() al final y deploy/edge-node.env.example); los valores de
+este archivo son los valores por defecto documentados. Los IRIs del proyecto
+(PROJECT_NS, VOCAB_NS, ID_BASE) NO son configurables: forman parte del contrato
+KI-1 v2 y cambiarlos cambiaría la identidad de todas las observaciones.
 """
+
+import os
+from collections.abc import Mapping
+from typing import Any
 
 # --- Espacios de nombres (DIV-3) --------------------------------------------
 # REEMPLAZAR antes de la versión final por el dominio definitivo del proyecto
@@ -90,6 +100,109 @@ MQTT_PASSWORD = None
 # por el gateway). Con --sink file es la única salida (pruebas sin broker).
 OUTBOX_PATH = "outbox_ki1.jsonl"
 
+# Observaciones que fallaron en M2 (anotación, serialización, tópico o envío):
+# la observación cruda y el motivo, en JSON Lines con fsync (core/pipeline.py).
+ERRORS_PATH = "outbox_ki1_errors.jsonl"
+
+# --- Operación ---------------------------------------------------------------
+LOG_LEVEL = "INFO"
+# Al recibir SIGTERM, tiempo máximo para procesar las observaciones que quedan
+# en la cola interna antes de cerrar los sinks.
+SHUTDOWN_DRAIN_SECONDS = 10.0
+
 assert PROJECT_NS.endswith("/") and "github.com" not in PROJECT_NS, (
     "PROJECT_NS debe ser la URL del sitio publicado y terminar en '/'"
 )
+
+
+# --- Configuración por entorno (EDGE_*) ---------------------------------------
+
+
+class ConfigError(ValueError):
+    """Variable de entorno EDGE_* con un valor no válido."""
+
+
+_LOG_LEVELS = ("DEBUG", "INFO", "WARNING", "ERROR")
+
+
+def _texto(variable: str, valor: str) -> str:
+    if not valor.strip():
+        raise ConfigError(f"{variable} no puede estar vacía")
+    return valor
+
+
+def _host(variable: str, valor: str) -> str:
+    if not valor or any(c.isspace() for c in valor):
+        raise ConfigError(f"{variable} debe ser un nombre de host sin espacios: {valor!r}")
+    return valor
+
+
+def _numero(tipo, minimo, maximo):
+    def convertir(variable: str, valor: str):
+        try:
+            numero = tipo(valor)
+        except ValueError:
+            raise ConfigError(f"{variable} debe ser un {tipo.__name__}: {valor!r}") from None
+        if not minimo <= numero <= maximo:
+            raise ConfigError(f"{variable} debe estar entre {minimo} y {maximo}: {valor!r}")
+        return numero
+
+    return convertir
+
+
+def _ventana(variable: str, valor: str) -> float:
+    numero = _numero(float, 0.0, 600.0)(variable, valor)
+    if numero <= 0:
+        raise ConfigError(f"{variable} debe ser mayor que 0: {valor!r}")
+    return numero
+
+
+def _client_id(variable: str, valor: str) -> str:
+    # MQTT 3.1.1 garantiza client_id de 1 a 23 caracteres en cualquier broker.
+    if not 1 <= len(valor) <= 23:
+        raise ConfigError(f"{variable} debe tener entre 1 y 23 caracteres: {valor!r}")
+    return valor
+
+
+def _nivel(variable: str, valor: str) -> str:
+    nivel = valor.strip().upper()
+    if nivel not in _LOG_LEVELS:
+        raise ConfigError(f"{variable} debe ser uno de {', '.join(_LOG_LEVELS)}: {valor!r}")
+    return nivel
+
+
+# variable de entorno -> (atributo de config, conversor y validador)
+ENV_VARIABLES = {
+    "EDGE_MQTT_HOST": ("MQTT_BROKER_HOST", _host),
+    "EDGE_MQTT_PORT": ("MQTT_BROKER_PORT", _numero(int, 1, 65535)),
+    "EDGE_MQTT_CLIENT_ID": ("MQTT_CLIENT_ID", _client_id),
+    "EDGE_OUTBOX_PATH": ("OUTBOX_PATH", _texto),
+    "EDGE_ERRORS_PATH": ("ERRORS_PATH", _texto),
+    "EDGE_WINDOW_SECONDS": ("PPD42NS_WINDOW_SECONDS", _ventana),
+    "EDGE_LOG_LEVEL": ("LOG_LEVEL", _nivel),
+    "EDGE_SHUTDOWN_DRAIN_SECONDS": ("SHUTDOWN_DRAIN_SECONDS", _numero(float, 0.0, 120.0)),
+}
+
+_DEFAULTS = {atributo: globals()[atributo] for atributo, _ in ENV_VARIABLES.values()}
+
+
+def load_settings(environ: Mapping[str, str]) -> dict[str, Any]:
+    """Valores operativos: los de este archivo, sobrescritos por las EDGE_* presentes.
+
+    Valida tipos y rangos y lanza ConfigError con el nombre de la variable si alguna
+    no es válida. No modifica el módulo (apply_environment() lo hace).
+    """
+    ajustes = dict(_DEFAULTS)
+    for variable, (atributo, convertir) in ENV_VARIABLES.items():
+        if variable in environ:
+            ajustes[atributo] = convertir(variable, environ[variable])
+    if os.path.abspath(ajustes["OUTBOX_PATH"]) == os.path.abspath(ajustes["ERRORS_PATH"]):
+        raise ConfigError("EDGE_ERRORS_PATH no puede ser el mismo archivo que EDGE_OUTBOX_PATH")
+    return ajustes
+
+
+def apply_environment(environ: Mapping[str, str] = os.environ) -> dict[str, Any]:
+    """Aplica load_settings() a este módulo. main.py lo llama al arrancar."""
+    ajustes = load_settings(environ)
+    globals().update(ajustes)
+    return ajustes
