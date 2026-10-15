@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elian0609.github.io/sensado-vehicular/contracts/v2/ki1-observation.schema.json",
+  "title": "KI-1 v2.0.0 · Observación JSON-LD (nodo edge M2 → gateway M3)",
+  "description": "Mensaje MQTT QoS 1, sin retain, tópico vehiculo/sensor/{sensor_id}/observacion. Escenario BORDE. Cambios frente a v1: @id obligatorio (ADR-002) y feature_of_interest como IRI (ADR-008). El @context debe ser idéntico a context/ki1-observation.context.jsonld.",
+  "x-contract-version": "2.0.0",
+  "type": "object",
+  "allOf": [
+    {"$ref": "_comun.schema.json#/$defs/camposObservacion"},
+    {"$ref": "_comun.schema.json#/$defs/reglaLpo"}
+  ],
+  "properties": {
+    "@context": {"$ref": "#/$defs/contexto"},
+    "@id": {"$ref": "_comun.schema.json#/$defs/observationId"},
+    "@type": {"const": "sosa:Observation"},
+    "raw": {"$ref": "_comun.schema.json#/$defs/rawEstricto"}
+  },
+  "required": ["@context", "@id", "@type"],
+  "unevaluatedProperties": false,
+  "$defs": {
+    "contexto": {
+      "allOf": [{"$ref": "_comun.schema.json#/$defs/contextoBase"}],
+      "required": ["sensor_id", "observed_property", "value", "result_time", "feature_of_interest", "unit"],
+      "properties": {
+        "sensor_id": {"const": {"@id": "sosa:madeBySensor", "@type": "@id"}},
+        "observed_property": {"const": {"@id": "sosa:observedProperty", "@type": "@id"}},
+        "value": {"const": {"@id": "sosa:hasSimpleResult", "@type": "xsd:double"}},
+        "result_time": {"const": {"@id": "sosa:resultTime", "@type": "xsd:dateTimeStamp"}},
+        "feature_of_interest": {"const": {"@id": "sosa:hasFeatureOfInterest", "@type": "@id"}},
+        "unit": {"const": "proy:unit"}
+      }
+    }
+  }
+}

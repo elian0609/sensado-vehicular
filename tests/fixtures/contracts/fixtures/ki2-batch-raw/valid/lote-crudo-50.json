@@ -1,0 +1,952 @@
+{
+  "observations": [
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.133345,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:17:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8945733,
+      "longitude": -79.032835,
+      "position_source": "trayectoria_cercana",
+      "raw": {
+        "pulse_count": 38,
+        "low_time_seconds": 4.0004,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.148,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:18:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8944633,
+      "longitude": -79.032745,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 27,
+        "low_time_seconds": 4.44,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.085,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:18:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8943533,
+      "longitude": -79.032655,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 34,
+        "low_time_seconds": 2.55,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.183,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:19:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8942433,
+      "longitude": -79.032565,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 41,
+        "low_time_seconds": 5.49,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.12,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:19:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8941333,
+      "longitude": -79.032475,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 48,
+        "low_time_seconds": 3.6,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.057,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:20:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8940233,
+      "longitude": -79.032385,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 24,
+        "low_time_seconds": 1.71,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.155,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:20:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8939133,
+      "longitude": -79.032295,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 31,
+        "low_time_seconds": 4.65,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.092,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:21:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8938033,
+      "longitude": -79.032205,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 38,
+        "low_time_seconds": 2.76,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.19,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:21:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8936933,
+      "longitude": -79.032115,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 45,
+        "low_time_seconds": 5.7,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.127,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:22:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8935833,
+      "longitude": -79.032025,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 21,
+        "low_time_seconds": 3.81,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.064,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:22:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8934733,
+      "longitude": -79.031935,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 28,
+        "low_time_seconds": 1.92,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.162,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:23:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8933633,
+      "longitude": -79.031845,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 35,
+        "low_time_seconds": 4.86,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.099,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:23:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8932533,
+      "longitude": -79.031755,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 42,
+        "low_time_seconds": 2.97,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.197,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:24:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8931433,
+      "longitude": -79.031665,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 49,
+        "low_time_seconds": 5.91,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.134,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:24:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8930333,
+      "longitude": -79.031575,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 25,
+        "low_time_seconds": 4.02,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.071,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:25:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8929233,
+      "longitude": -79.031485,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 32,
+        "low_time_seconds": 2.13,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.169,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:25:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8928133,
+      "longitude": -79.031395,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 39,
+        "low_time_seconds": 5.07,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 1.0,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:26:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8927033,
+      "longitude": -79.031305,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 0,
+        "low_time_seconds": 30.0,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "stuck_low",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.204,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:26:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8925933,
+      "longitude": -79.031215,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 22,
+        "low_time_seconds": 6.12,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.141,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:27:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8924833,
+      "longitude": -79.031125,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 29,
+        "low_time_seconds": 4.23,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.078,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:27:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8923733,
+      "longitude": -79.031035,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 36,
+        "low_time_seconds": 2.34,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.176,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:28:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8922633,
+      "longitude": -79.030945,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 43,
+        "low_time_seconds": 5.28,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.113,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:28:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8921533,
+      "longitude": -79.030855,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 50,
+        "low_time_seconds": 3.39,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.05,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:29:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8920433,
+      "longitude": -79.030765,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 26,
+        "low_time_seconds": 1.5,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.148,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:29:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8919333,
+      "longitude": -79.030675,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 33,
+        "low_time_seconds": 4.44,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.085,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:30:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8918233,
+      "longitude": -79.030585,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 40,
+        "low_time_seconds": 2.55,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.183,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:30:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8917133,
+      "longitude": -79.030495,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 47,
+        "low_time_seconds": 5.49,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.12,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:31:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8916033,
+      "longitude": -79.030405,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 23,
+        "low_time_seconds": 3.6,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.057,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:31:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8914933,
+      "longitude": -79.030315,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 30,
+        "low_time_seconds": 1.71,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.155,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:32:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8913833,
+      "longitude": -79.030225,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 37,
+        "low_time_seconds": 4.65,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.092,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:32:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8912733,
+      "longitude": -79.030135,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 44,
+        "low_time_seconds": 2.76,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.19,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:33:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8911633,
+      "longitude": -79.030045,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 20,
+        "low_time_seconds": 5.7,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.127,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:33:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8910533,
+      "longitude": -79.029955,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 27,
+        "low_time_seconds": 3.81,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.064,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:34:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "position_source": "no_disponible",
+      "raw": {
+        "pulse_count": 34,
+        "low_time_seconds": 1.92,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.162,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:34:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8908333,
+      "longitude": -79.029775,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 41,
+        "low_time_seconds": 4.86,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.099,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:35:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8907233,
+      "longitude": -79.029685,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 48,
+        "low_time_seconds": 2.97,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.197,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:35:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8906133,
+      "longitude": -79.029595,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 24,
+        "low_time_seconds": 5.91,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.134,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:36:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8905033,
+      "longitude": -79.029505,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 31,
+        "low_time_seconds": 4.02,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.071,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:36:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8903933,
+      "longitude": -79.029415,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 38,
+        "low_time_seconds": 2.13,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.169,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:37:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8902833,
+      "longitude": -79.029325,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 45,
+        "low_time_seconds": 5.07,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.106,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:37:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8901733,
+      "longitude": -79.029235,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 21,
+        "low_time_seconds": 3.18,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.204,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:38:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8900633,
+      "longitude": -79.029145,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 28,
+        "low_time_seconds": 6.12,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.141,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:38:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8899533,
+      "longitude": -79.029055,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 35,
+        "low_time_seconds": 4.23,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.078,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:39:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8898433,
+      "longitude": -79.028965,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 42,
+        "low_time_seconds": 2.34,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.176,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:39:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8897333,
+      "longitude": -79.028875,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 49,
+        "low_time_seconds": 5.28,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.113,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:40:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8896233,
+      "longitude": -79.028785,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 25,
+        "low_time_seconds": 3.39,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.05,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:40:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8895133,
+      "longitude": -79.028695,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 32,
+        "low_time_seconds": 1.5,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.148,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:41:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8894033,
+      "longitude": -79.028605,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 39,
+        "low_time_seconds": 4.44,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.085,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:41:39Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8892933,
+      "longitude": -79.028515,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 46,
+        "low_time_seconds": 2.55,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    },
+    {
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.183,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:42:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8891833,
+      "longitude": -79.028425,
+      "position_source": "actual",
+      "raw": {
+        "pulse_count": 22,
+        "low_time_seconds": 5.49,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    }
+  ]
+}

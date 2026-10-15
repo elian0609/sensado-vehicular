@@ -1,0 +1,76 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elian0609.github.io/sensado-vehicular/contracts/v2/ki2-batch.schema.json",
+  "title": "KI-2 v2.0.0 · Lote JSON-LD (gateway M4 → backend M5), POST /v1/batch",
+  "description": "Cuerpo exacto que envía la app (ADR-001): @context en la raíz y @graph con nodos clasificados por @type; se admiten lotes mixtos. Escenario BORDE y producción. Las observaciones llevan @id (ADR-002) salvo las legadas v1, para las que el backend lo deriva. Los registros viajan completos, con su propio @context. Un cuerpo que no cumpla este esquema en la raíz responde 422 (ADR-007); un nodo inválido se rechaza individualmente.",
+  "x-contract-version": "2.0.0",
+  "type": "object",
+  "required": ["@context", "@graph"],
+  "additionalProperties": false,
+  "properties": {
+    "@context": {
+      "type": "object",
+      "required": ["@base"],
+      "properties": {"@base": {"$ref": "_comun.schema.json#/$defs/base"}}
+    },
+    "@graph": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": {"$ref": "#/$defs/nodo"}
+    }
+  },
+  "$defs": {
+    "nodo": {
+      "type": "object",
+      "required": ["@type"],
+      "properties": {
+        "@type": {
+          "enum": [
+            "sosa:Observation",
+            "sosa:Sensor",
+            "sosa:Platform",
+            "sosa:ObservableProperty",
+            "sosa:FeatureOfInterest"
+          ]
+        }
+      },
+      "allOf": [
+        {
+          "if": {"properties": {"@type": {"const": "sosa:Observation"}}},
+          "then": {"$ref": "#/$defs/observacion"}
+        },
+        {
+          "if": {"properties": {"@type": {"const": "sosa:Sensor"}}},
+          "then": {"$ref": "ki1-registro-sensor.schema.json"}
+        },
+        {
+          "if": {"properties": {"@type": {"const": "sosa:Platform"}}},
+          "then": {"$ref": "ki1-registro-platform.schema.json"}
+        },
+        {
+          "if": {"properties": {"@type": {"const": "sosa:ObservableProperty"}}},
+          "then": {"$ref": "ki1-registro-property.schema.json"}
+        },
+        {
+          "if": {"properties": {"@type": {"const": "sosa:FeatureOfInterest"}}},
+          "then": {"$ref": "ki1-registro-foi.schema.json"}
+        }
+      ]
+    },
+    "observacion": {
+      "description": "Nodo de observación enriquecido por el gateway: sin @context propio (usa el de la raíz), con coordenadas opcionales.",
+      "type": "object",
+      "allOf": [
+        {"$ref": "_comun.schema.json#/$defs/camposObservacion"},
+        {"$ref": "_comun.schema.json#/$defs/camposGeo"},
+        {"$ref": "_comun.schema.json#/$defs/reglaLpo"}
+      ],
+      "properties": {
+        "@id": {"$ref": "_comun.schema.json#/$defs/observationId"},
+        "@type": {"const": "sosa:Observation"}
+      },
+      "unevaluatedProperties": false
+    }
+  }
+}

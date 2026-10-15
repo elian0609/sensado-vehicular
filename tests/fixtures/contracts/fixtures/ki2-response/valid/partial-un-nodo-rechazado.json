@@ -1,0 +1,18 @@
+{
+  "status": "partial",
+  "batch_size": 4,
+  "inserted": 2,
+  "duplicates": 0,
+  "upserted": 1,
+  "rejected": [
+    {
+      "index": 2,
+      "reason": "@id no coincide con la terna (ADR-002)",
+      "node_id": "obs/ppd42ns_01/low_pulse_occupancy_ratio/20991231T000000Z"
+    }
+  ],
+  "observation_ids": [
+    "https://elian0609.github.io/sensado-vehicular/id/obs/ppd42ns_01/low_pulse_occupancy_ratio/20261008T161739Z",
+    "https://elian0609.github.io/sensado-vehicular/id/obs/ppd42ns_01/low_pulse_occupancy_ratio/20261008T161809Z"
+  ]
+}

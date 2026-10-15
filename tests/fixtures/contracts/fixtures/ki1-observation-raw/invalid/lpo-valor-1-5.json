@@ -1,0 +1,16 @@
+{
+  "sensor_id": "ppd42ns_01",
+  "observed_property": "low_pulse_occupancy_ratio",
+  "value": 1.5,
+  "unit": "ratio_0_1",
+  "result_time": "2026-10-08T16:17:39Z",
+  "feature_of_interest": "ambient_air_at_device",
+  "raw": {
+    "pulse_count": 38,
+    "low_time_seconds": 4.0004,
+    "window_seconds": 30.0,
+    "gpio_pin_bcm": 4,
+    "quality_flag": "ok",
+    "clock_source": "gateway"
+  }
+}

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elian0609.github.io/sensado-vehicular/contracts/v2/ki1-registro-foi.schema.json",
+  "title": "KI-1 v2.0.0 · Registro sosa:FeatureOfInterest (nuevo, ADR-008)",
+  "description": "MQTT QoS 1 con retain, tópico vehiculo/foi/{feature_id}/registro. Da entidad al objeto de la observación (PC6).",
+  "x-contract-version": "2.0.0",
+  "type": "object",
+  "required": ["@context", "@type", "feature_id", "feature_kind", "description"],
+  "additionalProperties": false,
+  "properties": {
+    "@context": {
+      "allOf": [{"$ref": "_comun.schema.json#/$defs/contextoBase"}],
+      "required": ["rdfs", "feature_id", "feature_kind", "description"],
+      "properties": {
+        "rdfs": {"const": "http://www.w3.org/2000/01/rdf-schema#"},
+        "feature_id": {"const": "@id"},
+        "feature_kind": {"const": "proy:featureKind"},
+        "description": {"const": "rdfs:comment"}
+      }
+    },
+    "@type": {"const": "sosa:FeatureOfInterest"},
+    "feature_id": {"$ref": "_comun.schema.json#/$defs/idSegment"},
+    "feature_kind": {"type": "string", "minLength": 1},
+    "description": {"type": "string", "minLength": 1}
+  }
+}

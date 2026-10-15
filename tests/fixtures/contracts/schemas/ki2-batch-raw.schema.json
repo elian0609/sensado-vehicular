@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elian0609.github.io/sensado-vehicular/contracts/v2/ki2-batch-raw.schema.json",
+  "title": "KI-2 v2.0.0 · Lote crudo (emulador del gateway → backend), POST /v1/batch/raw",
+  "description": "Escenario BACKEND (ADR-004, ADR-005): observaciones con los mismos nombres que el nodo JSON-LD y sin @context, @type ni @id, con las coordenadas ya resueltas. El backend las anota (M5) y deriva el @id con la regla de ADR-002.",
+  "x-contract-version": "2.0.0",
+  "type": "object",
+  "required": ["observations"],
+  "additionalProperties": false,
+  "properties": {
+    "observations": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 500,
+      "items": {"$ref": "#/$defs/observacionCruda"}
+    }
+  },
+  "$defs": {
+    "observacionCruda": {
+      "type": "object",
+      "allOf": [
+        {"$ref": "_comun.schema.json#/$defs/camposObservacion"},
+        {"$ref": "_comun.schema.json#/$defs/camposGeo"},
+        {"$ref": "_comun.schema.json#/$defs/reglaLpo"}
+      ],
+      "unevaluatedProperties": false
+    }
+  }
+}

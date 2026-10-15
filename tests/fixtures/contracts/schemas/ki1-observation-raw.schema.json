@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://elian0609.github.io/sensado-vehicular/contracts/v2/ki1-observation-raw.schema.json",
+  "title": "KI-1 v2.0.0 · Observación cruda (modo crudo del edge, escenario BACKEND)",
+  "description": "Mismos nombres de campo que edge_node/core/observation.py y que el nodo JSON-LD, sin @context, @type ni @id (ADR-005). Lo emite M2 en modo crudo durante el replay del nivel edge (ADR-004).",
+  "x-contract-version": "2.0.0",
+  "type": "object",
+  "allOf": [
+    {"$ref": "_comun.schema.json#/$defs/camposObservacion"},
+    {"$ref": "_comun.schema.json#/$defs/reglaLpo"}
+  ],
+  "properties": {
+    "raw": {"$ref": "_comun.schema.json#/$defs/rawEstricto"}
+  },
+  "unevaluatedProperties": false
+}

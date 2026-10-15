@@ -1,0 +1,54 @@
+{
+  "@context": {
+    "@base": "https://elian0609.github.io/sensado-vehicular/id/",
+    "sosa": "http://www.w3.org/ns/sosa/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "geo": "http://www.w3.org/2003/01/geo/wgs84_pos#",
+    "proy": "https://elian0609.github.io/sensado-vehicular/vocab#",
+    "sensor_id": {
+      "@id": "sosa:madeBySensor",
+      "@type": "@id"
+    },
+    "observed_property": {
+      "@id": "sosa:observedProperty",
+      "@type": "@id"
+    },
+    "value": {
+      "@id": "sosa:hasSimpleResult",
+      "@type": "xsd:double"
+    },
+    "result_time": {
+      "@id": "sosa:resultTime",
+      "@type": "xsd:dateTimeStamp"
+    },
+    "feature_of_interest": {
+      "@id": "sosa:hasFeatureOfInterest",
+      "@type": "@id"
+    },
+    "unit": "proy:unit",
+    "latitude": "geo:lat",
+    "longitude": "geo:long"
+  },
+  "@graph": [
+    {
+      "@id": "obs/ppd42ns_01/low_pulse_occupancy_ratio/20261008T161809Z",
+      "@type": "sosa:Observation",
+      "sensor_id": "ppd42ns_01",
+      "observed_property": "low_pulse_occupancy_ratio",
+      "value": 0.148,
+      "unit": "ratio_0_1",
+      "result_time": "2026-10-08T16:18:09Z",
+      "feature_of_interest": "ambient_air_at_device",
+      "latitude": -2.8944633,
+      "position_source": "trayectoria_interpolada",
+      "raw": {
+        "pulse_count": 27,
+        "low_time_seconds": 4.44,
+        "window_seconds": 30.0,
+        "gpio_pin_bcm": 4,
+        "quality_flag": "ok",
+        "clock_source": "gateway"
+      }
+    }
+  ]
+}

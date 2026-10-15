@@ -1,0 +1,24 @@
+{
+  "@context": {
+    "@base": "https://elian0609.github.io/sensado-vehicular/id/",
+    "sosa": "http://www.w3.org/ns/sosa/",
+    "xsd": "http://www.w3.org/2001/XMLSchema#",
+    "proy": "https://elian0609.github.io/sensado-vehicular/vocab#",
+    "sensor_id": "@id",
+    "hosted_by": {
+      "@id": "sosa:isHostedBy",
+      "@type": "@id"
+    },
+    "sensor_model": "proy:sensorModel",
+    "sensor_type": "proy:sensorType",
+    "calibration_params": {
+      "@id": "proy:calibrationParams",
+      "@type": "@json"
+    },
+    "install_date": {
+      "@id": "proy:installDate",
+      "@type": "xsd:date"
+    },
+    "status": "proy:status"
+  }
+}
