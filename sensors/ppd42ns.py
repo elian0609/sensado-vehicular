@@ -15,11 +15,28 @@ import logging
 import threading
 import time
 from datetime import datetime, timezone
+from typing import Callable
 
 from core.observation import Observation
 from sensors.base import SensorModule
 
 log = logging.getLogger("edge_node.ppd42ns")
+
+
+def _occupancy(low_seconds: float, window_seconds: float) -> float:
+    if window_seconds <= 0:
+        raise ValueError(f"ventana no positiva: {window_seconds}")
+    return min(max(low_seconds / window_seconds, 0.0), 1.0)
+
+
+def lpo_ratio(low_seconds: float, window_seconds: float) -> float:
+    """LPO publicado: fracción de la ventana en bajo, limitada a [0, 1] y redondeada
+    a 6 decimales."""
+    return round(_occupancy(low_seconds, window_seconds), 6)
+
+
+def _utc_now() -> datetime:
+    return datetime.now(timezone.utc)
 
 
 class PPD42NSSensor(SensorModule):
@@ -30,14 +47,24 @@ class PPD42NSSensor(SensorModule):
     STUCK_LOW_MIN_RATIO = 0.99
 
     def __init__(
-        self, sensor_id: str, gpio_bcm: int, window_seconds: float, feature_of_interest: str
+        self,
+        sensor_id: str,
+        gpio_bcm: int,
+        window_seconds: float,
+        feature_of_interest: str,
+        *,
+        monotonic: Callable[[], float] = time.monotonic,
+        sleep: Callable[[float], None] = time.sleep,
+        now: Callable[[], datetime] = _utc_now,
     ):
+        """monotonic, sleep y now solo se sustituyen en pruebas (reloj simulado)."""
         from gpiozero import DigitalInputDevice  # import tardío: permite simular
 
         self.sensor_id = sensor_id
         self.gpio_bcm = gpio_bcm
         self.sample_window_seconds = window_seconds
         self.feature_of_interest = feature_of_interest
+        self._monotonic, self._sleep, self._now = monotonic, sleep, now
 
         self._lock = threading.Lock()
         self._low_since = None
@@ -51,25 +78,25 @@ class PPD42NSSensor(SensorModule):
 
     def _on_low(self):
         with self._lock:
-            self._low_since = time.monotonic()
+            self._low_since = self._monotonic()
 
     def _on_high(self):
         with self._lock:
             if self._low_since is not None:
-                self._low_total += time.monotonic() - self._low_since
+                self._low_total += self._monotonic() - self._low_since
                 self._low_since = None
                 self._pulses += 1
 
     def read(self) -> list[Observation]:
         with self._lock:
             self._low_total, self._pulses = 0.0, 0
-            self._low_since = time.monotonic() if self._pin.is_active else None
-            start = time.monotonic()
+            self._low_since = self._monotonic() if self._pin.is_active else None
+            start = self._monotonic()
 
-        time.sleep(self.sample_window_seconds)
+        self._sleep(self.sample_window_seconds)
 
         with self._lock:
-            now = time.monotonic()
+            now = self._monotonic()
             low = self._low_total
             if self._low_since is not None:  # pulso aún abierto al cierre
                 low += now - self._low_since
@@ -77,7 +104,7 @@ class PPD42NSSensor(SensorModule):
             window = now - start
             pulses = self._pulses
 
-        lpo = min(max(low / window, 0.0), 1.0)
+        lpo = _occupancy(low, window)
         # Señal en bajo toda la ventana sin ningún flanco: no es una medición,
         # es el pin sin sensor (desconectado o cable suelto). La observación se
         # publica igual, por trazabilidad, pero marcada para descartarla.
@@ -92,9 +119,9 @@ class PPD42NSSensor(SensorModule):
             Observation(
                 sensor_id=self.sensor_id,
                 observed_property=self.OBSERVED_PROPERTY,
-                value=round(lpo, 6),
+                value=lpo_ratio(low, window),
                 unit=self.UNIT,
-                result_time=datetime.now(timezone.utc),
+                result_time=self._now(),  # fin de la ventana
                 feature_of_interest=self.feature_of_interest,
                 raw={
                     "pulse_count": pulses,
