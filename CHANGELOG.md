@@ -3,6 +3,31 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). La versión sigue la
 del contrato KI-1 que emite el nodo (`MCS_BACKEND/contracts/`).
 
+## [Sin publicar] — Iteración 5 (rama `iter-05-edge-experimental`)
+
+### Añadido
+- `semantic/annotator.py`: `raw_message()`, mensaje crudo de KI-1 (ADR-005, `ki1-observation-raw`
+  v2): los campos y el orden de `annotate()` sin `@context`, `@id` ni `@type`. Solo para el replay.
+- `tools/replay.py`: una ejecución del nivel edge. Lee una traza en JSONL canónico, reconstruye
+  cada `Observation` (sin GPIO ni pausas) y mide, por observación, tiempo de pared
+  (`perf_counter_ns`), CPU del proceso (`process_time_ns`) y bytes UTF-8 de la transformación +
+  serialización (BORDE o BACKEND); por ejecución, CPU y tiempo totales, RSS al empezar y pico,
+  temperatura y `get_throttled`. Escribe `metricas_edge.csv` y `metricas_edge_ejecucion.csv`
+  (protocolo §7 v1.3). No publica en MQTT ni escribe el outbox.
+- `tools/experimento_edge.py`: campaña (calentamiento por escenario + N alternadas, un proceso por
+  ejecución), aborto si `get_throttled` ≠ `0x0` o temperatura > 70 °C (> 50 °C al empezar),
+  `ejecuciones.csv` y `campana.meta.json` (hash de la traza, commit, entorno), resumen con mediana y
+  p95 por escenario.
+- `tests/test_replay.py` (15 casos: fidelidad URDNA2015 y byte a byte con la traza piloto,
+  contratos, CSV, aislamiento) y `tests/test_experimento_edge.py` (9 casos: campaña de ensayo 2 + 2
+  y abortos). `tests/fixtures/piloto/`: traza piloto sin posición y outbox de la Pi.
+- `ops/VERIFICACION_HARDWARE.md` §9 (pendiente de verificación en hardware) y sección del replay en
+  el README.
+
+### Sin cambios
+- Modo de producción: `main.py`, los sinks y M1 no cambian; las 169 pruebas anteriores siguen en
+  verde.
+
 ## [Sin publicar] — Iteración 4b (rama `iter-04b-campo`)
 
 ### Añadido

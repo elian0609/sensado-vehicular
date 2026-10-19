@@ -260,3 +260,22 @@ ventana (`"0x0"` con alimentación correcta; los bits 16–19 son acumulados des
 evidencia, no cambia `quality_flag` (BL-51). Si `vcgencmd` no está disponible, el nodo sigue,
 avisa una vez en el log y guarda `null` (`sensors/throttled.py`). El contrato KI-1 v2 no cambia:
 `raw` admite campos libres.
+
+## Nivel edge del experimento (replay)
+Para medir el coste de la anotación en la Pi (ADR-004, hipótesis H3) sin GPIO ni pausas:
+`tools/replay.py` lee una traza en JSONL canónico (exportada y ampliada en MCS_BACKEND),
+reconstruye cada `Observation` y mide la transformación + serialización en el escenario
+**BORDE** (`annotate` + `serialize`, KI-1 v2) o **BACKEND** (`raw_message` + `serialize`, mensaje
+crudo de ADR-005, contrato `ki1-observation-raw`). `tools/experimento_edge.py` ejecuta la campaña
+completa (calentamiento + 10 ejecuciones por escenario, alternadas, una por proceso) y aborta si
+`get_throttled` ≠ `0x0` o la temperatura supera 70 °C. **No cambia el modo de producción:** el
+replay no publica en MQTT ni escribe el outbox, y en campo el nodo siempre anota. Procedimiento en
+la Pi: `ops/VERIFICACION_HARDWARE.md` §9; diseño y formato de los CSV: `PROTOCOLO_EXPERIMENTAL.md`
+§6.2 y §7 (MCS_BACKEND).
+
+```bash
+python3 -m tools.replay --trace traza.jsonl --scenario BORDE \
+    --run-id "$(python3 -c 'import uuid; print(uuid.uuid4())')" --out resultados/
+python3 -m tools.experimento_edge --trace traza.jsonl --out resultados/ensayo \
+    --repeticiones 2 --sin-control-hw          # ensayo en la PC (sin vcgencmd)
+```

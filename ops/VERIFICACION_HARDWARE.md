@@ -107,6 +107,50 @@ El 2026-10-17 se ejecutó con la app de la Iteración 4 (ya fusionada), no con l
 Antes de una captura: lista de comprobación de campo
 ([`MCS_BACKEND/docs/operacion/CHECKLIST_CAMPO.md`](https://github.com/LeandroFreireGH/MCS_BACKEND/blob/master/docs/operacion/CHECKLIST_CAMPO.md)).
 
+## 9. Campaña del nivel edge (Iteración 5)
+
+**PENDIENTE DE VERIFICACIÓN EN HARDWARE.** Procedimiento de `PROTOCOLO_EXPERIMENTAL.md` §6.2
+(MCS_BACKEND, v1.3). Herramientas: `tools/replay.py` (una ejecución) y `tools/experimento_edge.py`
+(la campaña). En la PC: `--sin-control-hw`; en la Pi, nunca.
+
+Preparación en la PC (traza sin coordenadas: el nivel edge no las usa y la Pi no las necesita):
+
+```bash
+cd MCS_BACKEND
+uv run python - <<'EOF'
+import json
+with open("/tmp/traza_ampliada.jsonl", "w") as o:
+    for linea in open("experiment/traces/piloto-ampliada/traza_ampliada.jsonl"):
+        n = json.loads(linea)
+        for k in ("latitude", "longitude", "position_source"):
+            n.pop(k, None)
+        o.write(json.dumps(n, sort_keys=True, separators=(",", ":"), ensure_ascii=False) + "\n")
+EOF
+cd /tmp && sha256sum traza_ampliada.jsonl > traza_ampliada.sha256
+scp traza_ampliada.jsonl traza_ampliada.sha256 <usuario>@<pi>:~/campana/
+```
+
+| # | Comando (en la Pi) | Resultado esperado | Resultado |
+|---|---|---|---|
+| 9.1 | `cd ~/sensado-vehicular && git pull --ff-only origin main && git log --oneline -1` | Commit que contiene `iter-05-edge-experimental` | |
+| 9.2 | `cd ~/campana && sha256sum -c traza_ampliada.sha256` | `traza_ampliada.jsonl: La suma coincide` | |
+| 9.3 | `sudo systemctl stop edge-node && systemctl is-active edge-node` | `inactive` | |
+| 9.4 | `cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_governor` (anotar) y `echo performance \| sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor` | Anterior: `ondemand` (habitual); después, `performance` | |
+| 9.5 | Completar `ops/ENTORNO_REFERENCIA.md` (modelo, SO, Python, gobernador) | Entorno anotado con la fecha de la campaña | |
+| 9.6 | `vcgencmd measure_temp; vcgencmd get_throttled` (repetir hasta < 50 °C) | `temp` < 50 °C; `throttled=0x0` | |
+| 9.7 | `cd ~/sensado-vehicular && python3 -m tools.experimento_edge --trace ~/campana/traza_ampliada.jsonl --out ~/campana/resultados/$(date +%Y%m%d)` | `Campaña completa: 22 ejecuciones`; tabla con mediana y p95 de BORDE y BACKEND; código de salida 0. Si dice `abortada`, anotar el motivo, corregir (fuente, temperatura) y repetir en un directorio nuevo | |
+| 9.8 | `head -3 ~/campana/resultados/*/ejecuciones.csv; wc -l ~/campana/resultados/*/*.csv` | 22 ejecuciones (2 de calentamiento, `descartada = true`); `metricas_edge.csv` con 22 × N + 1 líneas | |
+| 9.9 | `grep -c ',0x0,0x0,' ~/campana/resultados/*/metricas_edge_ejecucion.csv` | 22 (`get_throttled` = `0x0` al empezar y al terminar cada ejecución) | |
+| 9.10 | `echo <gobernador anotado> \| sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor && sudo systemctl start edge-node && systemctl is-active edge-node` | Gobernador restaurado; `active` | |
+| 9.11 | En la PC: `scp -r <usuario>@<pi>:~/campana/resultados/<fecha> MCS_BACKEND/experiment/resultados/edge/` | Los cuatro archivos copiados (`ejecuciones.csv`, `metricas_edge.csv`, `metricas_edge_ejecucion.csv`, `campana.meta.json`) | |
+
+**Duración estimada** con la traza de ensayo (5022 observaciones): en la PC, 0,2 s de medición
+por ejecución (BORDE 206 ms, BACKEND 147 ms) y 0,4 s con el arranque del proceso, con un pico de RSS
+de 24 MiB. En la Pi 3B, entre 10 y 20 veces más lenta en Python, unos 5–8 s por ejecución y
+**2–3 min las 22 ejecuciones**, más la espera inicial hasta 50 °C (unos minutos con el servicio
+detenido). No hace falta reducir K ni las repeticiones. La medición del 2026-10-19 en la Pi no se
+pudo hacer porque la Pi no estaba accesible; esta estimación se confirmará en 9.7.
+
 ## Si algo falla: volver a v1
 
 ```bash
