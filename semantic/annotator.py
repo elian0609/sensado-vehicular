@@ -44,6 +44,22 @@ def annotate(obs: Observation, clock_source: str | None = None) -> dict[str, Any
     }
 
 
+def raw_message(obs: Observation, clock_source: str | None = None) -> dict[str, Any]:
+    """Mensaje crudo de KI-1 (ADR-005; contrato ki1-observation-raw v2): los mismos campos y el
+    mismo orden que annotate(), sin @context, @id ni @type. Solo lo usa el replay del nivel edge
+    (escenario BACKEND, ADR-004); en producción el nodo siempre anota."""
+    raw = obs.raw if clock_source is None else {**obs.raw, "clock_source": clock_source}
+    return {
+        "sensor_id": obs.sensor_id,
+        "observed_property": obs.observed_property,
+        "value": obs.value,
+        "unit": obs.unit,
+        "result_time": _iso_utc(obs.result_time),
+        "feature_of_interest": obs.feature_of_interest,
+        "raw": raw,
+    }
+
+
 def serialize(doc: dict[str, Any]) -> str:
     """Serialización compacta (sin espacios): es la que se mide como payload."""
     return json.dumps(doc, ensure_ascii=False, separators=(",", ":"))
