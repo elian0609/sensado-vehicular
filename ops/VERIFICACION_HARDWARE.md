@@ -89,20 +89,20 @@ El 2026-10-17 se ejecutó con la app de la Iteración 4 (ya fusionada), no con l
 
 ## 8. Evidencia de alimentación (Iteración 4b, BL-51)
 
-**PENDIENTE DE VERIFICACIÓN EN HARDWARE** (rama `iter-04b-campo`). Con el cable bueno, el
+**VERIFICADO EN HARDWARE el 2026-10-19** (17:07–17:15, `main` en `ac5ec6d`, que contiene `iter-04b-campo`). Con el cable bueno, el
 2026-10-19 la Pi daba `throttled=0x0` (27 min tras el arranque) y `vcgencmd get_throttled` tardó
 3,4 ms; no existe `/sys/devices/platform/soc/soc:firmware/get_throttled` en este kernel (solo
 `hwmon1/in0_lcrit_alarm` de `rpi_volt`, sin el valor hexadecimal).
 
 | # | Comando (en la Pi) | Resultado esperado | Resultado |
 |---|---|---|---|
-| 8.1 | `git fetch origin && git checkout iter-04b-campo && git pull` (o `main` tras la fusión) | Último commit igual al de `ops/PR_iter-04b.md` | |
-| 8.2 | `sudo systemctl restart edge-node`; esperar 2 ventanas (~1 min) | `active` | |
-| 8.3 | `vcgencmd get_throttled` | `throttled=0x0` (cable y fuente correctos) | |
-| 8.4 | `tail -n2 outbox_ki1.jsonl \| grep -o '"throttled":"[^"]*"'` | `"throttled":"0x0"` en las dos líneas | |
-| 8.5 | `journalctl -u edge-node --since '-5 min' \| grep -i throttled` | Sin avisos `raw.throttled no disponible` | |
-| 8.6 | `tail -n4 outbox_ki1.jsonl > /tmp/outbox_4b.jsonl && python3 -m tools.validate_jsonld /tmp/outbox_4b.jsonl` | `Documentos: 4 \| válidos: 4`; código de salida 0 (`raw` queda fuera de la expansión semántica) | |
-| 8.7 | En la app: DevTools → consola KI_1 | Las observaciones se guardan como antes (la app no valida `raw`) | |
+| 8.1 | `git fetch origin && git checkout iter-04b-campo && git pull` (o `main` tras la fusión) | Último commit igual al de `ops/PR_iter-04b.md` | `git pull --ff-only origin main` → `ac5ec6d Merge pull request #3 from elian0609/iter-04b-campo` (copia previa del outbox en `~/outbox_ki1_antes_4b_20261019.jsonl`) |
+| 8.2 | `sudo systemctl restart edge-node`; esperar 2 ventanas (~1 min) | `active` | El autor reinició el servicio (`sudo` con contraseña): `active` desde las 17:07:51 |
+| 8.3 | `vcgencmd get_throttled` | `throttled=0x0` (cable y fuente correctos) | `throttled=0x0` |
+| 8.4 | `tail -n2 outbox_ki1.jsonl \| grep -o '"throttled":"[^"]*"'` | `"throttled":"0x0"` en las dos líneas | `"throttled":"0x0"` en las dos líneas (22:08:22Z y 22:08:52Z); mensaje de 987 B (antes 969 B, +18 B) |
+| 8.5 | `journalctl -u edge-node --since '-5 min' \| grep -i throttled` | Sin avisos `raw.throttled no disponible` | 0 líneas con `throttled` en el log; `outbox_ki1_errors.jsonl` vacío |
+| 8.6 | `tail -n4 outbox_ki1.jsonl > /tmp/outbox_4b.jsonl && python3 -m tools.validate_jsonld /tmp/outbox_4b.jsonl` | `Documentos: 4 \| válidos: 4`; código de salida 0 (`raw` queda fuera de la expansión semántica) | `Documentos: 4 \| válidos: 4`; código de salida 0 |
+| 8.7 | En la app: DevTools → consola KI_1 | Las observaciones se guardan como antes (la app no valida `raw`) | App de `master` (`515f2f4`) en modo mesa: las 11 observaciones medidas desde el reinicio (17:08:22–17:13:22) llegaron al backend con `raw.throttled = "0x0"` dentro de `raw_jsonld`; 0 rechazos |
 
 Antes de una captura: lista de comprobación de campo
 ([`MCS_BACKEND/docs/operacion/CHECKLIST_CAMPO.md`](https://github.com/LeandroFreireGH/MCS_BACKEND/blob/master/docs/operacion/CHECKLIST_CAMPO.md)).
