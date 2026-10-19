@@ -56,6 +56,7 @@ def _sensor(reloj, eventos, ventana=3.0):
         monotonic=reloj.monotonic,
         sleep=pausa,
         now=reloj.now,
+        throttled=lambda: "0x0",  # BL-51: lector falso (tests/test_throttled.py)
     )
 
 
