@@ -9,6 +9,9 @@ raw.quality_flag:
   "ok"        medición válida.
   "stuck_low" la señal estuvo en bajo toda la ventana sin ningún pulso: el
               pin no tiene sensor (desconectado o cable suelto). LPO no válido.
+
+raw.throttled (BL-51): valor de `vcgencmd get_throttled` al cerrar la ventana ("0x0" con
+alimentación correcta), o null si no está disponible. Evidencia, no afecta a quality_flag.
 """
 
 import logging
@@ -19,6 +22,7 @@ from datetime import UTC, datetime
 
 from core.observation import Observation
 from sensors.base import SensorModule
+from sensors.throttled import ThrottledProbe
 
 log = logging.getLogger("edge_node.ppd42ns")
 
@@ -56,8 +60,11 @@ class PPD42NSSensor(SensorModule):
         monotonic: Callable[[], float] = time.monotonic,
         sleep: Callable[[float], None] = time.sleep,
         now: Callable[[], datetime] = _utc_now,
+        throttled: Callable[[], str | None] | None = None,
     ):
-        """monotonic, sleep y now solo se sustituyen en pruebas (reloj simulado)."""
+        """monotonic, sleep y now solo se sustituyen en pruebas (reloj simulado).
+
+        throttled: lector de `get_throttled` (por defecto, vcgencmd); en pruebas, uno falso."""
         from gpiozero import DigitalInputDevice  # import tardío: permite simular
 
         self.sensor_id = sensor_id
@@ -65,6 +72,7 @@ class PPD42NSSensor(SensorModule):
         self.sample_window_seconds = window_seconds
         self.feature_of_interest = feature_of_interest
         self._monotonic, self._sleep, self._now = monotonic, sleep, now
+        self._throttled = ThrottledProbe(throttled) if throttled else ThrottledProbe()
 
         self._lock = threading.Lock()
         self._low_since = None
@@ -104,6 +112,10 @@ class PPD42NSSensor(SensorModule):
             window = now - start
             pulses = self._pulses
 
+        result_time = self._now()  # fin de la ventana, antes de cualquier otra lectura
+        # Fuera del cerrojo: los flancos del GPIO siguen registrándose mientras se lee.
+        throttled = self._throttled.read()
+
         lpo = _occupancy(low, window)
         # Señal en bajo toda la ventana sin ningún flanco: no es una medición,
         # es el pin sin sensor (desconectado o cable suelto). La observación se
@@ -121,7 +133,7 @@ class PPD42NSSensor(SensorModule):
                 observed_property=self.OBSERVED_PROPERTY,
                 value=lpo_ratio(low, window),
                 unit=self.UNIT,
-                result_time=self._now(),  # fin de la ventana
+                result_time=result_time,
                 feature_of_interest=self.feature_of_interest,
                 raw={
                     "pulse_count": pulses,
@@ -129,6 +141,7 @@ class PPD42NSSensor(SensorModule):
                     "window_seconds": round(window, 3),
                     "gpio_pin_bcm": self.gpio_bcm,
                     "quality_flag": "stuck_low" if stuck_low else "ok",
+                    "throttled": throttled,
                 },
             )
         ]

@@ -244,10 +244,19 @@ hardware ni esperan la ventana real.
 Todos en `config.py` (namespace, sensor, ventana de muestreo, broker, QoS,
 raíz de tópicos). El broker se indica siempre por nombre de dominio.
 Antes de cada sesión de campo (Fase 6), poner la etiqueta de la ruta en
-`PLATFORM["route_label"]`.
+`PLATFORM["route_label"]` y seguir la lista de comprobación de campo
+([`MCS_BACKEND/docs/operacion/CHECKLIST_CAMPO.md`](https://github.com/LeandroFreireGH/MCS_BACKEND/blob/master/docs/operacion/CHECKLIST_CAMPO.md), para imprimir): hotspot en 2,4 GHz,
+`vcgencmd get_throttled` = `0x0` tras el arranque, copia del outbox al terminar.
 
 ## Calidad de las observaciones
 Cada observación lleva `raw.quality_flag`:
 - `ok`: medición válida.
 - `stuck_low`: la señal estuvo en bajo toda la ventana sin ningún pulso (sensor
   desconectado o cable suelto). El LPO (≈ 1.0) no es válido y debe descartarse.
+
+## Evidencia de alimentación (`raw.throttled`)
+Cada observación lleva además `raw.throttled`: el valor de `vcgencmd get_throttled` al cerrar la
+ventana (`"0x0"` con alimentación correcta; los bits 16–19 son acumulados desde el arranque). Es
+evidencia, no cambia `quality_flag` (BL-51). Si `vcgencmd` no está disponible, el nodo sigue,
+avisa una vez en el log y guarda `null` (`sensors/throttled.py`). El contrato KI-1 v2 no cambia:
+`raw` admite campos libres.

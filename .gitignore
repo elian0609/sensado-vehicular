@@ -1,5 +1,6 @@
 __pycache__/
 *.pyc
-outbox_ki1*.jsonl.venv/
+outbox_ki1*.jsonl
+.venv/
 .pytest_cache/
 .ruff_cache/

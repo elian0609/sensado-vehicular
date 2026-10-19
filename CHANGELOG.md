@@ -3,6 +3,27 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). La versión sigue la
 del contrato KI-1 que emite el nodo (`MCS_BACKEND/contracts/`).
 
+## [Sin publicar] — Iteración 4b (rama `iter-04b-campo`)
+
+### Añadido
+- `raw.throttled` en cada observación del PPD42NS: valor de `vcgencmd get_throttled` al cerrar la
+  ventana, en hexadecimal (`"0x0"`), como evidencia de alimentación (BL-51). Lector inyectable
+  (`sensors/throttled.py`): sin `vcgencmd` el nodo sigue, avisa una sola vez y guarda `null`. La
+  lectura se hace fuera del cerrojo de los pulsos y después de medir la ventana (no altera su
+  duración ni `result_time`); límite de 1 s, ~3 ms medidos en la Pi 3B. Sin cambio de contrato
+  (KI-1 v2: `raw` admite campos libres); el mensaje crece ~19 B.
+- `tests/test_throttled.py` (20 casos).
+- `ops/VERIFICACION_HARDWARE.md` §8 (pendiente de verificación en hardware) y enlace a la lista de
+  comprobación de campo de MCS_BACKEND en el README.
+
+### Corregido
+- `.gitignore`: `outbox_ki1*.jsonl` y `.venv/` en líneas separadas (rama `fix/gitignore-outbox`,
+  incluida aquí).
+
+### Documentación
+- `ops/VERIFICACION_HARDWARE.md`: resultados de la verificación del 2026-10-17 y
+  `ops/ENTORNO_REFERENCIA.md` (rama `ops/verificacion-hw-20261017`, incluida aquí).
+
 ## [2.0.1] — Iteración 3 (rama `iter-03-vectores`)
 
 ### Añadido
