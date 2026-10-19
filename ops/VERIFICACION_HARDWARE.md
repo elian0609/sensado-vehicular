@@ -87,6 +87,26 @@ El 2026-10-17 se ejecutó con la app de la Iteración 4 (ya fusionada), no con l
 | 7.2 | Revisar la consola KI_1 de la app | Aparece `Mensaje MQTT recibido en tópico [vehiculo/foi/ambient_air_at_device/registro]` sin línea de error posterior (la app lo ignora) || El registro FOI se guarda y se envía (la app nueva ya no lo ignora); las observaciones v2 llegan con `@id` como primera clave y el orden de claves del contrato |
 | 7.3 | DevTools → Forzar sincronización | Sincroniza como antes (la app aún reenvía el nodo sin `@id`; el backend lo deriva) || Envío automático por T_max (01:29:20Z): lote de 50, 50 insertadas, 0 rechazadas. Las 20 observaciones v2 tienen en el backend `observation_id` = `@base` + `@id` del edge, `device_id = moto_01` y el `gateway_id` de la app |
 
+## 8. Evidencia de alimentación (Iteración 4b, BL-51)
+
+**PENDIENTE DE VERIFICACIÓN EN HARDWARE** (rama `iter-04b-campo`). Con el cable bueno, el
+2026-10-19 la Pi daba `throttled=0x0` (27 min tras el arranque) y `vcgencmd get_throttled` tardó
+3,4 ms; no existe `/sys/devices/platform/soc/soc:firmware/get_throttled` en este kernel (solo
+`hwmon1/in0_lcrit_alarm` de `rpi_volt`, sin el valor hexadecimal).
+
+| # | Comando (en la Pi) | Resultado esperado | Resultado |
+|---|---|---|---|
+| 8.1 | `git fetch origin && git checkout iter-04b-campo && git pull` (o `main` tras la fusión) | Último commit igual al de `ops/PR_iter-04b.md` | |
+| 8.2 | `sudo systemctl restart edge-node`; esperar 2 ventanas (~1 min) | `active` | |
+| 8.3 | `vcgencmd get_throttled` | `throttled=0x0` (cable y fuente correctos) | |
+| 8.4 | `tail -n2 outbox_ki1.jsonl \| grep -o '"throttled":"[^"]*"'` | `"throttled":"0x0"` en las dos líneas | |
+| 8.5 | `journalctl -u edge-node --since '-5 min' \| grep -i throttled` | Sin avisos `raw.throttled no disponible` | |
+| 8.6 | `tail -n4 outbox_ki1.jsonl > /tmp/outbox_4b.jsonl && python3 -m tools.validate_jsonld /tmp/outbox_4b.jsonl` | `Documentos: 4 \| válidos: 4`; código de salida 0 (`raw` queda fuera de la expansión semántica) | |
+| 8.7 | En la app: DevTools → consola KI_1 | Las observaciones se guardan como antes (la app no valida `raw`) | |
+
+Antes de una captura: lista de comprobación de campo
+([`MCS_BACKEND/docs/operacion/CHECKLIST_CAMPO.md`](https://github.com/LeandroFreireGH/MCS_BACKEND/blob/master/docs/operacion/CHECKLIST_CAMPO.md)).
+
 ## Si algo falla: volver a v1
 
 ```bash
