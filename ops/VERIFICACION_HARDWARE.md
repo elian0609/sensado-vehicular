@@ -142,7 +142,7 @@ scp traza_ampliada.jsonl traza_ampliada.sha256 <usuario>@<pi>:~/campana/
 | 9.7 | `cd ~/sensado-vehicular && python3 -m tools.experimento_edge --trace ~/campana/traza_ampliada.jsonl --out ~/campana/resultados/$(date +%Y%m%d)` | `Campaña completa: 22 ejecuciones`; tabla con mediana y p95 de BORDE y BACKEND; código de salida 0. Si dice `abortada`, anotar el motivo, corregir (fuente, temperatura) y repetir en un directorio nuevo | `Campaña completa: 22 ejecuciones`, código 0, **57,7 s** de pared (18:53:11–18:54:09) |
 | 9.8 | `head -3 ~/campana/resultados/*/ejecuciones.csv; wc -l ~/campana/resultados/*/*.csv` | 22 ejecuciones (2 de calentamiento, `descartada = true`); `metricas_edge.csv` con 22 × N + 1 líneas | 22 ejecuciones (2 de calentamiento); `metricas_edge.csv` con 110 485 líneas (22 × 5022 + 1) |
 | 9.9 | `grep -c ',0x0,0x0,' ~/campana/resultados/*/metricas_edge_ejecucion.csv` | 22 (`get_throttled` = `0x0` al empezar y al terminar cada ejecución) | 22 (`0x0` al empezar y al terminar cada ejecución) |
-| 9.10 | `echo <gobernador anotado> \| sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor && sudo systemctl start edge-node && systemctl is-active edge-node` | Gobernador restaurado; `active` | El autor restauró la Pi: `ondemand` en los 4 núcleos y `edge-node` `active` desde las 18:59:35; `get_throttled = 0x0` |
+| 9.10 | `echo <gobernador anotado> \| sudo tee /sys/devices/system/cpu/cpu*/cpufreq/scaling_governor && sudo systemctl start edge-node && systemctl is-active edge-node` | Gobernador restaurado; `active` | **Verificado:** el autor restauró la Pi; `ondemand` en los 4 núcleos y `edge-node` `active` desde las 18:59:35 (comprobado por SSH); `get_throttled = 0x0`; primera observación tras el arranque (00:00:06Z) con `"throttled":"0x0"` |
 | 9.11 | En la PC: `scp -r <usuario>@<pi>:~/campana/resultados/<fecha> MCS_BACKEND/experiment/resultados/edge/` | Los cuatro archivos copiados (`ejecuciones.csv`, `metricas_edge.csv`, `metricas_edge_ejecucion.csv`, `campana.meta.json`) | Copiados a MCS_BACKEND `experiment/results/ensayo-edge/` (`metricas_edge.csv` comprimido; hashes en `SHA256SUMS`) |
 
 **Resultado de la campaña de ensayo (2026-10-19).** Sin abortos; `get_throttled = 0x0` en todas
@@ -156,7 +156,9 @@ escenario, unidad = ejecución; mediana y p95 entre ejecuciones):
 | BACKEND | 106,1 µs (p95 106,7) | 194,4 µs (p95 195,5) | 324 B (315–325) |
 
 `total_ms` incluye unos 89 µs por observación de registro de la propia medición (fila, `@id` y
-`ts_utc` del CSV), iguales en los dos escenarios (BL-60 en MCS_BACKEND). **Duración real: 57,7 s**
+`ts_utc` del CSV), iguales en los dos escenarios. Por decisión del autor (BL-60 en MCS_BACKEND, protocolo v1.4), la
+métrica principal del nivel edge y de H3 es la suma de los bloques medidos / N; el total por ejecución
+es secundario, y en la Iteración 7 el replay escribirá el CSV fuera de la región medida. **Duración real: 57,7 s**
 frente a la estimación de 2–3 min (unos 2,6 s por ejecución con el arranque del proceso): la Pi fue
 unas 2–3 veces más rápida de lo extrapolado desde la PC (en el bloque medido, unas 7 veces más lenta
 que la PC, no 10–20).
