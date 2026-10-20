@@ -29,7 +29,7 @@ import resource
 import sys
 import time
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -159,15 +159,23 @@ def ejecutar(
     if escenario not in ESCENARIOS:
         raise ValueError(f"escenario desconocido: {escenario!r} (BORDE o BACKEND)")
     leer_throttled = leer_throttled or ThrottledProbe().read
-    inicio = datetime.now(UTC)
     throttled_inicio, temp_inicio, rss_inicio = leer_throttled(), leer_temp(), rss_mb()
+    inicio, inicio_ns = datetime.now(UTC), time.perf_counter_ns()
 
-    filas = []
+    # Región medida (BL-60): solo marcas de tiempo y de CPU, guardadas en listas en memoria.
+    n = len(observaciones)
+    pared, cpu, fin_ns, textos = [0] * n, [0] * n, [0] * n, [""] * n
     total_t0, total_c0 = time.perf_counter_ns(), time.process_time_ns()
     for idx, (obs, reloj) in enumerate(observaciones):
         t0, c0 = time.perf_counter_ns(), time.process_time_ns()
         texto = transformar(obs, reloj, escenario)
         c1, t1 = time.process_time_ns(), time.perf_counter_ns()
+        pared[idx], cpu[idx], fin_ns[idx], textos[idx] = t1 - t0, c1 - c0, t1, texto
+    total_c1, total_t1 = time.process_time_ns(), time.perf_counter_ns()
+
+    # Fuera de la región medida: bytes UTF-8, @id y ts_utc (derivada del reloj monótono).
+    filas = []
+    for idx, (obs, _) in enumerate(observaciones):
         filas.append(
             {
                 "run_id": run_id,
@@ -177,19 +185,18 @@ def ejecutar(
                 "observation_id": observation_id(
                     obs.sensor_id, obs.observed_property, obs.result_time
                 ),
-                "annotate_serialize_us": f"{(t1 - t0) / 1000:.3f}",
-                "cpu_us": f"{(c1 - c0) / 1000:.3f}",
-                "bytes_ki1": len(texto.encode("utf-8")),
-                "ts_utc": _iso(datetime.now(UTC)),
+                "annotate_serialize_us": f"{pared[idx] / 1000:.3f}",
+                "cpu_us": f"{cpu[idx] / 1000:.3f}",
+                "bytes_ki1": len(textos[idx].encode("utf-8")),
+                "ts_utc": _iso(inicio + timedelta(microseconds=(fin_ns[idx] - inicio_ns) / 1000)),
             }
         )
-    total_c1, total_t1 = time.process_time_ns(), time.perf_counter_ns()
 
     ejecucion = {
         "run_id": run_id,
         "escenario": escenario,
         "repeticion": repeticion,
-        "n_obs": len(filas),
+        "n_obs": n,
         "cpu_total_ms": f"{(total_c1 - total_c0) / 1e6:.3f}",
         "total_ms": f"{(total_t1 - total_t0) / 1e6:.3f}",
         "rss_inicio_mb": _numero(rss_inicio),
