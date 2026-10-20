@@ -268,7 +268,10 @@ reconstruye cada `Observation` y mide la transformación + serialización en el 
 **BORDE** (`annotate` + `serialize`, KI-1 v2) o **BACKEND** (`raw_message` + `serialize`, mensaje
 crudo de ADR-005, contrato `ki1-observation-raw`). `tools/experimento_edge.py` ejecuta la campaña
 completa (calentamiento + 10 ejecuciones por escenario, alternadas, una por proceso) y aborta si
-`get_throttled` ≠ `0x0` o la temperatura supera 70 °C. **No cambia el modo de producción:** el
+`get_throttled` ≠ `0x0` o la temperatura supera 70 °C. La medición sigue BL-60: dentro del bucle
+medido solo se guardan marcas de tiempo y de CPU en memoria; el `@id`, `ts_utc`, los bytes y los CSV
+se calculan y escriben después. La métrica principal (H3 y H1 en el edge) es la suma de los bloques
+medidos dividida entre N; `total_ms / N` es secundaria. **No cambia el modo de producción:** el
 replay no publica en MQTT ni escribe el outbox, y en campo el nodo siempre anota. Procedimiento en
 la Pi: `ops/VERIFICACION_HARDWARE.md` §9; diseño y formato de los CSV: `PROTOCOLO_EXPERIMENTAL.md`
 §6.2 y §7 (MCS_BACKEND).
