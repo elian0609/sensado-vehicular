@@ -3,6 +3,17 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). La versión sigue la
 del contrato KI-1 que emite el nodo (`MCS_BACKEND/contracts/`).
 
+## [Sin publicar] — Iteración 7 (rama `iter-07-banco`)
+
+### Cambiado
+- `tools/replay.py` (BL-60): el bucle medido solo guarda en listas en memoria las marcas de tiempo
+  y de CPU de cada bloque y la referencia al mensaje; el `@id`, `ts_utc` (derivada del reloj
+  monótono), los bytes UTF-8 y las filas del CSV se calculan después, y los CSV se escriben al
+  terminar la ejecución. Sobrecarga del bucle frente a la suma de bloques en la PC: del 43 % al
+  2,0 % (BORDE) y del 82 % al 3,5 % (BACKEND). El formato de los CSV no cambia.
+- `tests/test_replay_medicion.py` (5 casos): orden de las operaciones, escritura al terminar,
+  formato y sobrecarga < 25 %.
+
 ## [Sin publicar] — Iteración 5 (rama `iter-05-edge-experimental`)
 
 ### Añadido
