@@ -1,7 +1,7 @@
 """Toda la salida de KI-1 del nodo cumple el contrato v2 (MCS_BACKEND/contracts/v2).
 
 - annotate() + serialize() valida contra ki1-observation;
-- los 4 registros (plataforma, propiedad, FOI y sensor) validan contra sus esquemas;
+- cada registro (plataforma, propiedades, FOI y sensores) valida contra sus esquemas;
 - las fixtures v2 de KI-1 se comportan como se espera con las reglas del edge
   (identidad de ADR-002 y @context del edge);
 - el @context publicado en docs/ es idéntico al del código y al del contrato.
@@ -37,6 +37,13 @@ EDGE_CONTEXTS = {
     "ki1-registro-platform": PLATFORM_CONTEXT,
     "ki1-registro-property": PROPERTY_CONTEXT,
     "ki1-registro-foi": FOI_CONTEXT,
+}
+# Campo que identifica la entidad en cada documento de registro (alias de @id).
+ID_DEL_REGISTRO = {
+    "sosa:Sensor": "sensor_id",
+    "sosa:Platform": "vehicle_id",
+    "sosa:ObservableProperty": "property_name",
+    "sosa:FeatureOfInterest": "feature_id",
 }
 SCHEMA_BY_TYPE = {
     "sosa:Sensor": "ki1-registro-sensor",
@@ -105,10 +112,14 @@ def test_telemetria_coincide_con_la_fixture_real_del_contrato(observation):
     assert annotate(observation, clock_source="gateway") == fixture
 
 
-def test_se_emiten_los_cuatro_registros_y_cada_uno_valida():
+def test_se_emite_un_registro_por_entidad_configurada_y_cada_uno_valida():
     documentos = registration_documents()
     tipos = [d["@type"] for d in documentos]
-    assert sorted(tipos) == sorted(SCHEMA_BY_TYPE)
+    assert set(tipos) == set(SCHEMA_BY_TYPE)
+    assert tipos.count("sosa:Platform") == 1
+    assert tipos.count("sosa:ObservableProperty") == len(config.OBSERVED_PROPERTIES)
+    assert tipos.count("sosa:FeatureOfInterest") == len(config.FEATURES_OF_INTEREST)
+    assert tipos.count("sosa:Sensor") == len(config.SENSOR_METADATA)
     for documento in documentos:
         esquema = SCHEMA_BY_TYPE[documento["@type"]]
         recibido = json.loads(serialize(documento))
@@ -116,15 +127,24 @@ def test_se_emiten_los_cuatro_registros_y_cada_uno_valida():
 
 
 def test_los_registros_coinciden_con_las_fixtures_del_contrato():
-    por_tipo = {d["@type"]: d for d in registration_documents()}
-    fixtures = {
-        "sosa:Sensor": "ki1-registro-sensor/valid/sensor-ppd42ns-01.json",
-        "sosa:Platform": "ki1-registro-platform/valid/plataforma-moto-01.json",
-        "sosa:ObservableProperty": "ki1-registro-property/valid/propiedad-lpo.json",
-        "sosa:FeatureOfInterest": "ki1-registro-foi/valid/foi-aire-ambiente.json",
+    # Por (tipo, identificador propio): con varios sensores o propiedades hay varios por tipo.
+    por_entidad = {
+        (d["@type"], d[ID_DEL_REGISTRO[d["@type"]]]): d for d in registration_documents()
     }
-    for tipo, ruta in fixtures.items():
-        assert por_tipo[tipo] == load_json(CONTRACTS / "fixtures" / ruta), tipo
+    fixtures = {
+        ("sosa:Sensor", "ppd42ns_01"): "ki1-registro-sensor/valid/sensor-ppd42ns-01.json",
+        ("sosa:Platform", "moto_01"): "ki1-registro-platform/valid/plataforma-moto-01.json",
+        (
+            "sosa:ObservableProperty",
+            "low_pulse_occupancy_ratio",
+        ): "ki1-registro-property/valid/propiedad-lpo.json",
+        (
+            "sosa:FeatureOfInterest",
+            "ambient_air_at_device",
+        ): "ki1-registro-foi/valid/foi-aire-ambiente.json",
+    }
+    for entidad, ruta in fixtures.items():
+        assert por_entidad[entidad] == load_json(CONTRACTS / "fixtures" / ruta), entidad
 
 
 def test_registro_foi_se_publica_retenido_en_su_topico():

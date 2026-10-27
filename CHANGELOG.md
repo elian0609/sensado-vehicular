@@ -8,6 +8,8 @@ del contrato KI-1 que emite el nodo (`MCS_BACKEND/contracts/`).
 ### Cambiado
 - `semantic/registry.py`: los registros `sosa:Sensor` se generan recorriendo
   `config.SENSOR_METADATA` (sensor_id → metadatos); M2 ya no nombra ningún sensor concreto.
+- `tests/test_sinks.py`, `tests/test_contract_ki1.py`: los registros esperados se derivan de
+  `config` (N sensores, N propiedades) y se comparan con las fixtures por entidad, no por `@type`.
 
 ## [Sin publicar] — Iteración 7 (rama `iter-07-banco`)
 

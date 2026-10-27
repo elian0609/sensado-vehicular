@@ -4,6 +4,7 @@ import json
 
 import pytest
 
+import config
 from semantic.annotator import annotate
 from semantic.registry import registration_documents
 from sinks.base import FanOutSink, JsonlFileSink, Ki1Sink
@@ -63,16 +64,22 @@ def test_topicos_de_telemetria_y_registros(observation):
         "vehiculo/sensor/ppd42ns_01/observacion",
         False,
     )
-    topicos = {d["@type"]: topic_for(d) for d in registration_documents()}
-    assert topicos == {
-        "sosa:Platform": ("vehiculo/plataforma/registro", True),
-        "sosa:ObservableProperty": (
-            "vehiculo/propiedad/low_pulse_occupancy_ratio/registro",
-            True,
-        ),
-        "sosa:FeatureOfInterest": ("vehiculo/foi/ambient_air_at_device/registro", True),
-        "sosa:Sensor": ("vehiculo/sensor/ppd42ns_01/registro", True),
-    }
+    # Un registro retenido por entidad configurada, en el orden de registration_documents().
+    esperados = [("sosa:Platform", ("vehiculo/plataforma/registro", True))]
+    esperados += [
+        ("sosa:ObservableProperty", (f"vehiculo/propiedad/{p}/registro", True))
+        for p in config.OBSERVED_PROPERTIES
+    ]
+    esperados += [
+        ("sosa:FeatureOfInterest", (f"vehiculo/foi/{f}/registro", True))
+        for f in config.FEATURES_OF_INTEREST
+    ]
+    esperados += [
+        ("sosa:Sensor", (f"vehiculo/sensor/{s}/registro", True)) for s in config.SENSOR_METADATA
+    ]
+    topicos = [(d["@type"], topic_for(d)) for d in registration_documents()]
+    assert topicos == esperados
+    assert ("sosa:Sensor", ("vehiculo/sensor/ppd42ns_01/registro", True)) in topicos
 
 
 def test_topico_de_la_hora_del_gateway():
