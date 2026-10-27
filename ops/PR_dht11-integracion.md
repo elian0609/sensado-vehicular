@@ -1,7 +1,7 @@
 # PR · Integración del DHT11 — evaluación de modularidad
 
 **Rama:** `feat/dht11-integration` → `main` · **Base medida:** `eval-dht11-base` (`c332af7`) ·
-**Repositorio:** edge_node · **No hacer merge hasta la revisión del autor y las pruebas E1-E10.**
+**Repositorio:** edge_node · **Pruebas E1-E10 superadas (2026-10-27).**
 PR hermano: MCS_BACKEND `feat/dht11-integration` (herramientas del experimento, categoría (b)).
 MCP_APP: rama creada, **sin cambios**.
 
@@ -60,10 +60,29 @@ Total contra la base (código y pruebas): `config.py` +17/−0, `main.py` +9/−
 - En la Pi (2026-10-27): línea base del PPD42NS, cableado y V1-V5 del driver
   (`ops/VERIFICACION_HARDWARE.md` §10.1).
 
-## Pendiente de verificación en hardware
+## Verificación en hardware (2026-10-27, `ops/VERIFICACION_HARDWARE.md` §10.2)
 
-E1-E10 de `ops/VERIFICACION_HARDWARE.md` §10.2, con la sesión "después" en las mismas condiciones que
-la línea base estabilizada (reinicio del servicio, 5 min de estabilización, ventana de 26 min).
+Sesión "después" en las mismas condiciones que la línea base estabilizada (reinicio del servicio,
+5 min de estabilización, ventana de 26 min). **E1-E10 superadas:**
+
+| Prueba | Resultado |
+|---|---|
+| E1 | 7 registros retenidos; los dos sensores activos (ventana 30.0 s) |
+| E2 / E3 | 52 PPD42NS y 52 lecturas del DHT11 (104 observaciones); lecturas válidas 52/52 |
+| E4 | `@id` de la ventana: outbox 156 = backend 156 |
+| E5 | 156/156 y 7/7 válidos; PC2 y PC3 con `dht11_01` |
+| E6 | 22-23 °C, 36-38 %RH |
+| E7 | SIG desconectado 5 min: PPD42NS sin huecos; DHT11 con 11 fallos solo en el log; recuperación sin reiniciar |
+| E8 | Tarjeta con `observed_property` y `unit`; sin anomalías de ventana |
+| E9 | El mapa solo muestra LPO (52 puntos) |
+| E10 | ≈ 19,8 MB de RSS de Mosquitto con 9000 mensajes (614 MB disponibles); ráfaga de 127 entregada |
+
+**No regresión del PPD42NS:** 52 observaciones, 30,0 s, `ok`/`0x0`, 982-987 bytes (antes 981-987),
+CPU 4,66 % (antes 4,73 %), RSS +0,1-0,2 MB.
+
+**Hallazgos de la ejecución:** el panel RAW de la app tenía campos fijos del PPD42NS (acoplamiento
+residual de presentación, corregido en MCP_APP); el DHT11 se ubica casi siempre como
+`trayectoria_cercana` (medición puntual, ventana ≈ 0,04 s), consecuencia válida del diseño de M3.
 
 ## Impacto en la tesis
 

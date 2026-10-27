@@ -195,7 +195,7 @@ determinada, y ajuste inicial de NTP en la primera ventana).
 | 10.9 | V4: 10 lecturas cada 3 s como `elian-trelles` | ≥ 9/10 sin `sudo` | 9/10 (falla la 1.ª tras el arranque, `EIO`); 29/30 con 20 más; 22-23 °C, 36-38 %RH, 0,04 s por lectura |
 | 10.10 | V5: PPD42NS con el overlay cargado | Publica cada 30 s, GPIO4 sin conflicto | ✔ `ok`, `0x0` |
 
-### 10.2 Despliegue de la rama y pruebas de extremo a extremo (PENDIENTE DE VERIFICACIÓN EN HARDWARE)
+### 10.2 Despliegue de la rama y pruebas de extremo a extremo (verificado, 2026-10-27)
 
 Condiciones de la sesión "después" (las mismas que la línea base estabilizada): Pi encendida desde
 al menos 5 min y NTP sincronizado (`timedatectl show -p NTPSynchronized` = `yes`); el nodo se
@@ -204,16 +204,16 @@ reinicio + 31 min].
 
 | # | Comando (en la Pi) | Resultado esperado | Resultado |
 |---|---|---|---|
-| 10.11 | `git fetch && git switch --detach origin/feat/dht11-integration` (o la etiqueta final) | Commit de la rama | |
-| 10.12 | El autor: `sudo cp deploy/mosquitto/ki1.conf /etc/mosquitto/conf.d/ki1.conf && sudo systemctl restart mosquitto` | `max_queued_messages 9000` activo | |
-| 10.13 | El autor: `sudo systemctl restart edge-node` | E1: 7 registros retenidos; `Sensor ppd42ns_01 activo (ventana 30.0 s)` y `Sensor dht11_01 activo (ventana 30.0 s)` | |
-| 10.14 | Sesión de 30 min tras la estabilización | E2: ≈ 52 PPD42NS y ≈ 104 DHT11 en la ventana de 26 min; E3: lecturas válidas del DHT11 / periodos ≥ 0,90 | |
-| 10.15 | `python3 -m tools.validate_jsonld` sobre las líneas de la sesión | E5: todos válidos (incluidos los registros del DHT11) | |
-| 10.16 | Valores del DHT11 en el outbox | E6: 0-50 °C y 20-90 %RH, coherentes con el ambiente | |
-| 10.17 | Desconectar el SIG del DHT11 5 min y reconectar | E7: el PPD42NS sigue cada ~30 s; el DHT11 registra errores y se recupera sin reiniciar | |
-| 10.18 | App en el teléfono | E8: tarjeta con la propiedad y la unidad de cada observación; anomalías de ventana (BL-53) = 0 | |
-| 10.19 | Backend y dashboard | E4: `@id` del outbox = app = backend; E5: PC2-PC3 con `dht11_01`; E9: el mapa solo muestra LPO | |
-| 10.20 | App desconectada hasta acumular cola; `ps -o rss= -C mosquitto` y `ls -l /var/lib/mosquitto/mosquitto.db` | E10: memoria de Mosquitto con la cola de 9000 frente a la RAM libre | |
+| 10.11 | `git fetch && git switch --detach origin/feat/dht11-integration` (o la etiqueta final) | Commit de la rama || `be2aa5b` (`git switch --detach origin/feat/dht11-integration`), 2026-10-27; Pi encendida desde 58 min, NTP sincronizado, `throttled=0x0` |
+| 10.12 | El autor: `sudo cp deploy/mosquitto/ki1.conf /etc/mosquitto/conf.d/ki1.conf && sudo systemctl restart mosquitto` | `max_queued_messages 9000` activo || `active`, `max_queued_messages 9000`; el nodo se reconectó en 1 s, 2 clientes |
+| 10.13 | El autor: `sudo systemctl restart edge-node` | E1: 7 registros retenidos; `Sensor ppd42ns_01 activo (ventana 30.0 s)` y `Sensor dht11_01 activo (ventana 30.0 s)` || E1 ✔ Reinicio 13:32:38 -05: 7 registros retenidos (3 `ObservableProperty`, 2 `Sensor`); `Sensor ppd42ns_01 activo (ventana 30.0 s)` y `Sensor dht11_01 activo (ventana 30.0 s)` |
+| 10.14 | Sesión de 30 min tras la estabilización | E2: ≈ 52 PPD42NS y ≈ 104 DHT11 en la ventana de 26 min; E3: lecturas válidas del DHT11 / periodos ≥ 0,90 || E2 ✔ Ventana [18:37:38Z, 19:03:38Z]: 52 PPD42NS y 52 lecturas del DHT11 (104 observaciones en pares). E3 ✔ 52/52 = 1,00. No regresión del PPD42NS: 52 observaciones, 30,0 s, `ok`/`0x0`, 982-987 bytes, CPU 4,66 % (antes 4,73 %), RSS +0,1-0,2 MB |
+| 10.15 | `python3 -m tools.validate_jsonld` sobre las líneas de la sesión | E5: todos válidos (incluidos los registros del DHT11) || E5 ✔ 156/156 observaciones y 7/7 registros válidos |
+| 10.16 | Valores del DHT11 en el outbox | E6: 0-50 °C y 20-90 %RH, coherentes con el ambiente || E6 ✔ 22-23 °C, 36-38 %RH; `window_seconds` 0,024-0,026 s |
+| 10.17 | Desconectar el SIG del DHT11 5 min y reconectar | E7: el PPD42NS sigue cada ~30 s; el DHT11 registra errores y se recupera sin reiniciar || E7 ✔ Desconectado 14:16:35-14:22:14: PPD42NS 11 observaciones sin huecos; DHT11 11 `Fallo de lectura` (`TimeoutError [Errno 110]`), sin observaciones; mismo PID; recuperado a las 14:22:33 sin reiniciar |
+| 10.18 | App en el teléfono | E8: tarjeta con la propiedad y la unidad de cada observación; anomalías de ventana (BL-53) = 0 || E8 ✔ Tarjeta `relative_humidity` · `Sensor: dht11_01 \| percent_rh`; `window_seconds` válido en todas (sin anomalías BL-53). Hallado: el panel RAW tenía campos fijos del PPD42NS (corregido en MCP_APP). Posición del DHT11: `trayectoria_cercana` 46/52, `trayectoria_interpolada` 6/52 (medición puntual) |
+| 10.19 | Backend y dashboard | E4: `@id` del outbox = app = backend; E5: PC2-PC3 con `dht11_01`; E9: el mapa solo muestra LPO || E4 ✔ outbox 156 = backend 156; E5 ✔ PC2 `dht11_01` en `moto_01`, PC3 con `air_temperature`/`relative_humidity`; E9 ✔ GeoJSON de la ventana: 52 puntos, todos LPO |
+| 10.20 | App desconectada hasta acumular cola; `ps -o rss= -C mosquitto` y `ls -l /var/lib/mosquitto/mosquitto.db` | E10: memoria de Mosquitto con la cola de 9000 frente a la RAM libre || E10 ✔ App cerrada 14:24:07-14:45:32: 119 mensajes en cola en 20 min; RSS 1,35 kB/mensaje → ≈ 19,8 MB con 9000 (614 MB disponibles); `mosquitto.db` ≈ 9,4 MB; al reabrir, cola vaciada y 127 = 127 en el backend |
 
 Volver a la base: `git switch --detach eval-dht11-base`, restaurar `~/config.txt.eval-dht11-base`
 (el autor, con `sudo`) y reiniciar.
