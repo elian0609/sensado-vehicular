@@ -9,9 +9,15 @@ import json
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from gpiozero import Device
+from gpiozero.pins.mock import MockFactory
 
+import config
+import main
 from semantic.annotator import annotate, raw_message, serialize
+from semantic.registry import registration_documents
 from sensors.dht11 import DHT11Sensor
+from sinks.topics import topic_for
 from tests.conftest import schema_errors
 from tests.test_contract_ki1 import edge_checks
 
@@ -127,3 +133,46 @@ def test_las_observaciones_anotadas_cumplen_el_contrato_ki1_v2_y_se_expanden_a_r
         assert edge_checks("ki1-observation", documento) == [], obs.observed_property
         assert documento["@id"] == f"obs/dht11_01/{obs.observed_property}/20261027T174030Z"
         assert schema_errors("ki1-observation-raw", raw_message(obs, clock_source="ntp")) == []
+
+
+# --- Registro en el nodo (config.py y build_sensors() de main.py) -----------------------------
+
+
+def test_el_dht11_y_sus_propiedades_se_publican_como_registros_validos():
+    documentos = registration_documents()
+    sensores = {d["sensor_id"]: d for d in documentos if d["@type"] == "sosa:Sensor"}
+    propiedades = {
+        d["property_name"]: d for d in documentos if d["@type"] == "sosa:ObservableProperty"
+    }
+    assert sensores["dht11_01"]["sensor_model"] == "DHT11"
+    assert sensores["dht11_01"]["hosted_by"] == config.PLATFORM["vehicle_id"]
+    assert propiedades["air_temperature"]["unit"] == "degree_celsius"
+    assert propiedades["relative_humidity"]["unit"] == "percent_rh"
+    for documento in (
+        sensores["dht11_01"],
+        propiedades["air_temperature"],
+        propiedades["relative_humidity"],
+    ):
+        recibido = json.loads(serialize(documento))
+        esquema = (
+            "ki1-registro-sensor"
+            if documento["@type"] == "sosa:Sensor"
+            else "ki1-registro-property"
+        )
+        assert edge_checks(esquema, recibido) == [], documento
+    assert topic_for(sensores["dht11_01"]) == ("vehiculo/sensor/dht11_01/registro", True)
+
+
+def test_build_sensors_registra_el_dht11_junto_al_ppd42ns():
+    Device.pin_factory = MockFactory()  # el PPD42NS abre su GPIO al construirse
+    sensores = main.build_sensors()
+    try:
+        (dht11,) = [s for s in sensores if isinstance(s, DHT11Sensor)]
+        assert dht11.sensor_id == config.DHT11_SENSOR_ID
+        assert dht11.gpio_bcm == config.DHT11_GPIO_BCM == PIN
+        assert dht11.sample_window_seconds == config.DHT11_PERIOD_SECONDS == PERIODO
+        assert config.PPD42NS_SENSOR_ID in {s.sensor_id for s in sensores}
+    finally:
+        for sensor in sensores:
+            sensor.close()
+        Device.pin_factory.close()
