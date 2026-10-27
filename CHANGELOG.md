@@ -13,6 +13,13 @@ del contrato KI-1 que emite el nodo (`MCS_BACKEND/contracts/`).
 - `deploy/mosquitto/ki1.conf`: `max_queued_messages` documentado como autonomía × Σ tasas de
   mensajes de los sensores (valor sin cambios: 3000 = 25 h con un mensaje cada 30 s).
 
+### Obsoleto
+- Etiqueta `exp-borde-backend-congelado` (`c332af7`, solo PPD42NS): el experimento BORDE/BACKEND se
+  ejecutará sobre la arquitectura final con PPD42NS + DHT11, con la etiqueta nueva
+  `exp-borde-backend-final`, que se creará sobre `main` al terminar la integración del DHT11. La
+  etiqueta antigua no se mueve ni se borra (orden en MCS_BACKEND `docs/arquitectura/ROADMAP.md`,
+  Iteración 9).
+
 ## [Sin publicar] — Iteración 7 (rama `iter-07-banco`)
 
 ### Cambiado
