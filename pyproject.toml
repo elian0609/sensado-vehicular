@@ -2,15 +2,15 @@
 # instalable: se ejecuta como `python3 main.py` desde la raíz del repositorio.
 
 # Solo metadatos: no hay [build-system] ni paquetes que instalar. requires-python
-# documenta el requisito (Raspberry Pi OS Bookworm trae Python 3.11) y main.py lo
-# comprueba al arrancar.
+# documenta el requisito mínimo (Python 3.11, por core/clock.py; la Pi de referencia corre
+# Raspberry Pi OS sobre Debian 13 trixie, con Python 3.13) y main.py lo comprueba al arrancar.
 [project]
 name = "edge-node"
 version = "2.0.0"
 requires-python = ">=3.11"
 
 [tool.ruff]
-target-version = "py311"   # Raspberry Pi OS Bookworm (Python 3.11)
+target-version = "py311"   # mínimo admitido; la Pi de referencia (Debian 13 trixie) trae Python 3.13
 line-length = 100
 extend-exclude = [".venv", "tests/fixtures"]
 

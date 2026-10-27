@@ -13,6 +13,11 @@ del contrato KI-1 que emite el nodo (`MCS_BACKEND/contracts/`).
 - `deploy/mosquitto/ki1.conf`: `max_queued_messages` documentado como autonomía × Σ tasas de
   mensajes de los sensores (valor sin cambios: 3000 = 25 h con un mensaje cada 30 s).
 
+### Corregido
+- `config.py`, `pyproject.toml`, `README.md`, `ops/VERIFICACION_HARDWARE.md`: la Pi de referencia
+  corre Debian 13 trixie (Python 3.13), no Bookworm (`ops/ENTORNO_REFERENCIA.md`); el mínimo
+  Python 3.11 no cambia.
+
 ### Obsoleto
 - Etiqueta `exp-borde-backend-congelado` (`c332af7`, solo PPD42NS): el experimento BORDE/BACKEND se
   ejecutará sobre la arquitectura final con PPD42NS + DHT11, con la etiqueta nueva

@@ -35,7 +35,7 @@ en la propia Pi.
 
 | # | Comando | Resultado esperado | Resultado |
 |---|---|---|---|
-| 2.1 | `python3 --version` | Python 3.11.x (Raspberry Pi OS Bookworm). Con una versión anterior el nodo no arranca (`edge_node requiere Python >= 3.11`) || **Python 3.13.5** (Debian 13 trixie, no Bookworm). Cumple `>= 3.11` |
+| 2.1 | `python3 --version` | Python ≥ 3.11 (la Pi de referencia, Debian 13 trixie, trae 3.13.x). Con una versión anterior el nodo no arranca (`edge_node requiere Python >= 3.11`) || **Python 3.13.5** (Debian 13 trixie, no Bookworm). Cumple `>= 3.11` |
 | 2.2 | `uname -m` | `armv7l` o `aarch64` (hay ruedas de `lgpio` para ambos) || `aarch64` |
 | 2.3 | `python3 -c "import gpiozero, lgpio, paho.mqtt, pyld; print('ok')"` | `ok` || `ok` |
 | 2.4 | `python3 -m pip freeze 2>/dev/null \| grep -iE "gpiozero\|lgpio\|paho\|pyld"` y `dpkg -l python3-gpiozero python3-lgpio python3-paho-mqtt \| tail -3` | Versiones registradas en `ops/ENTORNO_REFERENCIA.md`. Si difieren de `requirements.txt` (gpiozero 2.0.1, lgpio 0.2.2.0, paho-mqtt 2.1.0), anotarlo: **las versiones de `requirements.txt` no se han confirmado en una Pi 3B** || pip: gpiozero 2.0.1, lgpio 0.2.2.0, paho-mqtt 2.1.0, PyLD 3.3.0, rpi-lgpio 0.6. dpkg: python3-gpiozero 2.0.1-0+rpt1+trixie, python3-lgpio 0.2.2-1~rpt1+trixie, python3-paho-mqtt 2.1.0-1. **Coinciden con `requirements.txt`** |

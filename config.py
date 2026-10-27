@@ -20,7 +20,7 @@ from typing import Any
 # cualquier otro módulo del nodo en main.py, así que el fallo es claro y temprano.
 if sys.version_info < (3, 11):  # noqa: UP036 (guarda intencional para la Pi)
     raise SystemExit(
-        f"edge_node requiere Python >= 3.11 (Raspberry Pi OS Bookworm); "
+        f"edge_node requiere Python >= 3.11 (la Pi de referencia: Debian 13 trixie, Python 3.13); "
         f"se está usando {sys.version.split()[0]}"
     )
 

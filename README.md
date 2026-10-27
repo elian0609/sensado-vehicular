@@ -100,7 +100,8 @@ con `proy:featureKind`) se regeneran con `python3 -m tools.build_site docs`.
 
 ## Instalación en la Raspberry Pi
 
-**Requisito: Python ≥ 3.11** (Raspberry Pi OS **Bookworm** en una Raspberry Pi 3B). El nodo se niega a
+**Requisito: Python ≥ 3.11** (la Pi de referencia, una Raspberry Pi 3B, corre Raspberry Pi OS sobre
+Debian 13 **trixie**, con Python 3.13). El nodo se niega a
 arrancar con una versión anterior (`config.py`), y `core/clock.py` necesita 3.11 para interpretar las
 horas con sufijo `Z` que publica el gateway. Comprobación: `python3 --version`.
 ```bash
