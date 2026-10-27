@@ -49,6 +49,13 @@ PPD42NS_SENSOR_ID = "ppd42ns_01"
 PPD42NS_GPIO_BCM = 4  # pin físico 7, tras divisor 1 kΩ / 2 kΩ
 PPD42NS_WINDOW_SECONDS = 30.0  # mínimo recomendado por el fabricante
 
+# --- Sensor DHT11 (Grove, H1 -> H2) ------------------------------------------
+# Lo lee el driver del kernel: dtoverlay=dht11,gpiopin=23 en /boot/firmware/config.txt.
+DHT11_SENSOR_ID = "dht11_01"
+DHT11_GPIO_BCM = 23  # pin físico 16; alimentado a 3,3 V (pin 1), GND en el pin 14
+DHT11_PERIOD_SECONDS = 30.0  # mismo periodo que el PPD42NS (hoja de datos: >= 1 s)
+DHT11_IIO_DIR = "/sys/bus/iio/devices/iio:device0"  # name = dht11@17 (verificado en la Pi)
+
 # --- Reloj de tiempo real DS1302 (tools/rtc_ds1302.py) -----------------------
 # La Pi no tiene reloj propio: sin red arrancaría con la hora del último
 # apagado y los result_time serían falsos. El DS1302 (con pila CR2032) da la
@@ -75,14 +82,24 @@ PPD42NS_METADATA = {
     "status": "activo",
 }
 
+DHT11_METADATA = {
+    "sensor_model": "DHT11",
+    "sensor_type": "temperature_humidity",
+    "install_date": "2026-10-27",  # cableado a GPIO23 / 3,3 V
+    "status": "activo",
+}
+
 # Sensores publicados como registro sosa:Sensor (semantic/registry.py): sensor_id -> metadatos.
 # Un sensor nuevo añade aquí su entrada, igual que sus propiedades en OBSERVED_PROPERTIES.
 SENSOR_METADATA = {
     PPD42NS_SENSOR_ID: PPD42NS_METADATA,
+    DHT11_SENSOR_ID: DHT11_METADATA,
 }
 
 OBSERVED_PROPERTIES = {
     "low_pulse_occupancy_ratio": {"unit": "ratio_0_1"},
+    "air_temperature": {"unit": "degree_celsius"},
+    "relative_humidity": {"unit": "percent_rh"},
 }
 
 PLATFORM = {

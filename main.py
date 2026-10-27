@@ -55,6 +55,7 @@ def enable_simulation(pin: int) -> None:
 
 
 def build_sensors():
+    from sensors.dht11 import DHT11Sensor
     from sensors.ppd42ns import PPD42NSSensor
 
     return [
@@ -64,7 +65,14 @@ def build_sensors():
             config.PPD42NS_WINDOW_SECONDS,
             config.DEFAULT_FEATURE_OF_INTEREST,
         ),
-        # Nuevo sensor = una línea aquí (p. ej. DHT11Sensor(...)).
+        DHT11Sensor(
+            config.DHT11_SENSOR_ID,
+            config.DHT11_GPIO_BCM,
+            config.DHT11_PERIOD_SECONDS,
+            config.DEFAULT_FEATURE_OF_INTEREST,
+            config.DHT11_IIO_DIR,
+        ),
+        # Nuevo sensor = una sentencia aquí y su bloque de parámetros en config.py.
     ]
 
 
