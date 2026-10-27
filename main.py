@@ -72,7 +72,7 @@ def build_sensors():
             config.DEFAULT_FEATURE_OF_INTEREST,
             config.DHT11_IIO_DIR,
         ),
-        # Nuevo sensor = una línea aquí (p. ej. DHT11Sensor(...)).
+        # Nuevo sensor = una sentencia aquí y su bloque de parámetros en config.py.
     ]
 
 
