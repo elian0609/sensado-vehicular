@@ -10,6 +10,8 @@ del contrato KI-1 que emite el nodo (`MCS_BACKEND/contracts/`).
   `config.SENSOR_METADATA` (sensor_id → metadatos); M2 ya no nombra ningún sensor concreto.
 - `tests/test_sinks.py`, `tests/test_contract_ki1.py`: los registros esperados se derivan de
   `config` (N sensores, N propiedades) y se comparan con las fixtures por entidad, no por `@type`.
+- `deploy/mosquitto/ki1.conf`: `max_queued_messages` documentado como autonomía × Σ tasas de
+  mensajes de los sensores (valor sin cambios: 3000 = 25 h con un mensaje cada 30 s).
 
 ## [Sin publicar] — Iteración 7 (rama `iter-07-banco`)
 
