@@ -53,11 +53,6 @@ COLUMNAS_EJECUCION = (
     "throttled_inicio", "throttled_fin", "inicio_utc", "fin_utc",
 )  # fmt: skip
 
-# Orden de raw que emite M1 (sensors/ppd42ns.py); la traza canónica lo tiene en orden alfabético.
-ORDEN_RAW = (
-    "pulse_count", "low_time_seconds", "window_seconds", "gpio_pin_bcm",
-    "quality_flag", "throttled",
-)  # fmt: skip
 CAMPOS_DE_LA_APP = ("latitude", "longitude", "position_source")
 TEMPERATURA = Path("/sys/class/thermal/thermal_zone0/temp")
 
@@ -70,13 +65,12 @@ def observacion_de_nodo(nodo: dict[str, Any]) -> tuple[Observation, str | None]:
     """Nodo KI-2 de la traza → (Observation de M1, clock_source).
 
     Se ignoran @id/@type (los vuelve a generar M2) y los campos que añade la app (posición).
-    clock_source sale de raw porque annotate() lo añade de nuevo; el resto de raw recupera el
-    orden de M1 para que el mensaje sea byte a byte el que emitió el nodo en campo.
+    clock_source sale de raw porque annotate() lo añade de nuevo. El resto de raw conserva el orden
+    de la traza, sin suponer el orden de claves de ningún sensor: la traza canónica lo pierde, pero
+    el mensaje tiene la misma longitud en bytes y el mismo documento que el emitido en campo.
     """
     raw = dict(nodo.get("raw") or {})
     reloj = raw.pop("clock_source", None)
-    ordenado = {k: raw[k] for k in ORDEN_RAW if k in raw}
-    ordenado.update({k: raw[k] for k in sorted(raw) if k not in ordenado})
     instante = datetime.fromisoformat(nodo["result_time"].replace("Z", "+00:00")).astimezone(UTC)
     obs = Observation(
         sensor_id=nodo["sensor_id"],
@@ -85,7 +79,7 @@ def observacion_de_nodo(nodo: dict[str, Any]) -> tuple[Observation, str | None]:
         unit=nodo["unit"],
         result_time=instante,
         feature_of_interest=nodo["feature_of_interest"],
-        raw=ordenado,
+        raw=raw,
     )
     return obs, reloj
 

@@ -85,10 +85,8 @@ def test_reconstruye_observation_y_clock_source_desde_el_nodo():
     )  # fmt: skip
     assert obs.value == 0.237675
     assert reloj == "ntp" and "clock_source" not in obs.raw
-    # El orden de raw es el de M1 (sensors/ppd42ns.py), no el alfabético de la traza.
-    assert list(obs.raw)[:5] == [
-        "pulse_count", "low_time_seconds", "window_seconds", "gpio_pin_bcm", "quality_flag"
-    ]  # fmt: skip
+    # raw conserva el orden de la traza: el replay no supone el orden de claves de ningún sensor.
+    assert list(obs.raw) == [k for k in nodo["raw"] if k != "clock_source"]
 
 
 def test_ignora_los_campos_que_anade_la_app():
@@ -117,12 +115,51 @@ def test_modo_semantico_es_semanticamente_identico_a_lo_emitido_en_campo():
         assert doc["raw"] == campo["raw"]  # raw queda fuera de la expansión: se compara aparte
 
 
-def test_modo_semantico_reproduce_los_bytes_emitidos_en_campo():
+def test_modo_semantico_reproduce_el_tamano_y_el_documento_emitidos_en_campo():
+    """La traza canónica pierde el orden de claves de raw: el mensaje reproducido tiene la misma
+    longitud en bytes y el mismo documento JSON que el emitido; el orden de raw puede diferir."""
     emitidos = {json.loads(linea)["@id"]: linea
                 for linea in OUTBOX.read_text(encoding="utf-8").splitlines()}  # fmt: skip
     for obs, reloj in replay.leer_traza(TRAZA):
         texto = serialize(annotate(obs, clock_source=reloj))
-        assert texto == emitidos[json.loads(texto)["@id"]]
+        campo = emitidos[json.loads(texto)["@id"]]
+        assert len(texto.encode("utf-8")) == len(campo.encode("utf-8"))
+        assert json.loads(texto) == json.loads(campo)
+
+
+def _nodo_de_traza(obs: Observation, clock_source: str) -> dict:
+    """Nodo KI-2 como lo exporta el backend: sin @context y con las claves ordenadas."""
+    documento = {
+        k: v for k, v in annotate(obs, clock_source=clock_source).items() if k != "@context"
+    }
+    return json.loads(json.dumps(documento, sort_keys=True))
+
+
+def test_traza_mixta_reproduce_tamano_y_documento_de_cualquier_sensor():
+    """Dos sensores con raw en su propio orden natural (ninguno coincide con el alfabético)."""
+    observaciones = [
+        make_observation(),
+        make_observation(
+            sensor_id="dht11_01",
+            observed_property="air_temperature",
+            value=22.0,
+            unit="degree_celsius",
+            raw={"gpio_pin_bcm": 23, "window_seconds": 0.043, "quality_flag": "ok"},
+        ),
+    ]
+    for obs in observaciones:
+        emitido = serialize(annotate(obs, clock_source="ntp"))
+        nodo = _nodo_de_traza(obs, "ntp")
+        reconstruida, reloj = replay.observacion_de_nodo(nodo)
+        assert list(reconstruida.raw) == [k for k in nodo["raw"] if k != "clock_source"]
+        for escenario in ("BORDE", "BACKEND"):
+            texto = replay.transformar(reconstruida, reloj, escenario)
+            original = replay.transformar(obs, "ntp", escenario)
+            assert len(texto.encode("utf-8")) == len(original.encode("utf-8")), escenario
+            assert json.loads(texto) == json.loads(original), escenario
+        assert len(serialize(annotate(reconstruida, clock_source=reloj)).encode()) == len(
+            emitido.encode()
+        )
 
 
 @pytest.mark.parametrize(
