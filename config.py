@@ -75,6 +75,12 @@ PPD42NS_METADATA = {
     "status": "activo",
 }
 
+# Sensores publicados como registro sosa:Sensor (semantic/registry.py): sensor_id -> metadatos.
+# Un sensor nuevo añade aquí su entrada, igual que sus propiedades en OBSERVED_PROPERTIES.
+SENSOR_METADATA = {
+    PPD42NS_SENSOR_ID: PPD42NS_METADATA,
+}
+
 OBSERVED_PROPERTIES = {
     "low_pulse_occupancy_ratio": {"unit": "ratio_0_1"},
 }

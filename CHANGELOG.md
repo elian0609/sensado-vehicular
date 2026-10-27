@@ -3,6 +3,12 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). La versión sigue la
 del contrato KI-1 que emite el nodo (`MCS_BACKEND/contracts/`).
 
+## [Sin publicar] — Revisión de conformidad del diseño (rama `revision-conformidad`)
+
+### Cambiado
+- `semantic/registry.py`: los registros `sosa:Sensor` se generan recorriendo
+  `config.SENSOR_METADATA` (sensor_id → metadatos); M2 ya no nombra ningún sensor concreto.
+
 ## [Sin publicar] — Iteración 7 (rama `iter-07-banco`)
 
 ### Cambiado

@@ -99,5 +99,5 @@ def registration_documents() -> list[dict[str, Any]]:
     docs = [platform_document()]
     docs += [property_document(n, p["unit"]) for n, p in config.OBSERVED_PROPERTIES.items()]
     docs += [foi_document(f, m) for f, m in config.FEATURES_OF_INTEREST.items()]
-    docs.append(sensor_document(config.PPD42NS_SENSOR_ID, config.PPD42NS_METADATA))
+    docs += [sensor_document(s, m) for s, m in config.SENSOR_METADATA.items()]
     return docs
