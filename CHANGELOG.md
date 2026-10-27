@@ -3,6 +3,24 @@
 Formato basado en [Keep a Changelog](https://keepachangelog.com/es-ES/1.1.0/). La versión sigue la
 del contrato KI-1 que emite el nodo (`MCS_BACKEND/contracts/`).
 
+## [Sin publicar] — Integración del DHT11, evaluación de modularidad (rama `feat/dht11-integration`)
+
+### Añadido
+- `sensors/dht11.py`: M1 del Grove DHT11 vía el driver `dht11` del kernel (IIO): dos observaciones
+  por lectura (`air_temperature` en `degree_celsius`, `relative_humidity` en `percent_rh`) con el
+  mismo `result_time`; `raw.window_seconds` = duración de la lectura. Requiere
+  `dtoverlay=dht11,gpiopin=23` en `/boot/firmware/config.txt`. Sin dependencias nuevas.
+- `tests/test_dht11.py` (10 casos).
+- `ops/VERIFICACION_HARDWARE.md` §10 y `ops/PR_dht11-integracion.md`.
+
+### Cambiado
+- `config.py`: bloque del DHT11, su entrada en `SENSOR_METADATA` y las dos propiedades en
+  `OBSERVED_PROPERTIES` (solo adiciones); `main.py`: el DHT11 en `build_sensors()`.
+- `deploy/mosquitto/ki1.conf`: `max_queued_messages` 9000 (25 h con PPD42NS + DHT11).
+- `tools/replay.py`: `raw` conserva el orden de la traza (sin `ORDEN_RAW`, el orden del PPD42NS);
+  el mensaje reproducido tiene la misma longitud en bytes y el mismo documento que el emitido.
+- README: cableado y overlay del DHT11, observaciones del DHT11 y periodo de estabilización de 5 min.
+
 ## [Sin publicar] — Revisión de conformidad del diseño (rama `revision-conformidad`)
 
 ### Cambiado

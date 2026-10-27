@@ -2,6 +2,7 @@
 
 ```
 PPD42NS --GPIO4--> M1 (sensors/ppd42ns.py, hilo propio, ventana 30 s)
+DHT11 --GPIO23 (driver dht11 del kernel, IIO)--> M1 (sensors/dht11.py, hilo propio, cada 30 s)
                      |  Observation (contrato interno, sin semántica)
                      v
                    M2 (semantic/annotator.py) --> JSON-LD 1.1
@@ -138,6 +139,27 @@ sudo mkdir -p /var/log/journal && sudo systemctl restart systemd-journald
   sin red arrancaría con la hora del último apagado. Conexión, a 3,3 V:
   VCC → pin 17, GND → pin 9, CLK → pin 11 (GPIO17), DAT → pin 13 (GPIO27),
   RST → pin 15 (GPIO22). Los pines se configuran en `config.py`.
+- **DHT11 (Seeed Studio Grove, temperatura y humedad relativa):** SIG (amarillo) → pin 16
+  (GPIO23), VCC (rojo) → **3,3 V, pin 1**, GND (negro) → pin 14; el hilo blanco (NC) queda
+  aislado. **Nunca a 5 V:** el módulo trae su pull-up hacia VCC y la línea de datos quedaría a 5 V
+  en el GPIO. No necesita divisor ni pull-up externo.
+
+### Sensor DHT11 (driver del kernel)
+El protocolo del DHT11 (pulsos de 26-70 µs) lo decodifica el driver `dht11` del kernel, que valida
+el checksum y expone la medición en IIO; `sensors/dht11.py` solo lee esos archivos (sin bibliotecas
+nuevas). El overlay usa GPIO4 por defecto, que es el pin del PPD42NS: hay que indicar `gpiopin=23`.
+```bash
+sudo cp /boot/firmware/config.txt ~/config.txt.respaldo
+printf "\n# DHT11 (Grove): SIG en GPIO23 / pin 16\ndtoverlay=dht11,gpiopin=23\n" | sudo tee -a /boot/firmware/config.txt
+sudo reboot
+# Tras el reinicio:
+lsmod | grep dht11                                     # módulo cargado
+grep -H . /sys/bus/iio/devices/iio:device*/name        # dht11@17 -> config.DHT11_IIO_DIR
+cat /sys/bus/iio/devices/iio:device0/in_temp_input     # m°C (p. ej. 22000)
+cat /sys/bus/iio/devices/iio:device0/in_humidityrelative_input   # m%RH
+```
+Es normal que la primera lectura tras el arranque falle (`Error de entrada/salida`): el nodo lo
+registra en el log y lo intenta de nuevo en el siguiente periodo.
 
 ### Reloj de tiempo real (DS1302)
 `tools/rtc_ds1302.py` lee y escribe el DS1302 por GPIO (no usa I2C ni requiere
@@ -253,6 +275,16 @@ Cada observación lleva `raw.quality_flag`:
 - `ok`: medición válida.
 - `stuck_low`: la señal estuvo en bajo toda la ventana sin ningún pulso (sensor
   desconectado o cable suelto). El LPO (≈ 1.0) no es válido y debe descartarse.
+
+El DHT11 publica dos observaciones por lectura (`air_temperature` en `degree_celsius` y
+`relative_humidity` en `percent_rh`) con el mismo `result_time`; su `raw.window_seconds` es la
+duración real de la lectura (≈ 0,04 s), no el periodo. Una lectura que el driver rechaza (checksum
+o tiempo agotado) no genera observación: queda en el log.
+
+Tras arrancar la Pi o reiniciar el servicio, las mediciones empiezan después de un **periodo de
+estabilización de 5 min** (o se descartan las de ese periodo): las primeras ventanas del PPD42NS
+dan un LPO alto (transitorio de arranque del servicio, causa no determinada) y, tras un arranque,
+el ajuste inicial de NTP desplaza el `result_time` de la primera ventana.
 
 ## Evidencia de alimentación (`raw.throttled`)
 Cada observación lleva además `raw.throttled`: el valor de `vcgencmd get_throttled` al cerrar la
